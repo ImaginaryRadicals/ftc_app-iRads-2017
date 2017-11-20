@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
+import android.text.ParcelableSpan;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -54,6 +55,7 @@ public class FileRecord_OpMode extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime loopTimer = new ElapsedTime();
     private FileOutputStream outputStream;
 
 
@@ -72,13 +74,7 @@ public class FileRecord_OpMode extends OpMode
             requestOpModeStop();
         }
 
-        recordText("Hello ", outputStream);
-        recordText("there ", outputStream);
-        recordText("this ", outputStream);
-        recordText("is ", outputStream);
-        recordText("a ", outputStream);
-        recordText("test.", outputStream);
-
+        recordText("Test Two Start" + System.getProperty("line.separator"), outputStream);
 
         telemetry.addData("Status", "Initialized");
     }
@@ -96,16 +92,22 @@ public class FileRecord_OpMode extends OpMode
     @Override
     public void start() {
         runtime.reset();
+        loopTimer.reset();
     }
 
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
+    Double loopInterval = new Double(0);
     @Override
     public void loop() {
 
+        loopInterval = loopTimer.seconds();
+        loopTimer.reset();
+
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Loop Time: ", loopInterval.toString());
         //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
     }
 
