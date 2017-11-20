@@ -93,30 +93,26 @@ public class Servo_Test extends OpMode
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
 
-    double sLeft, sRight, stepSize;
-
+    double stepSize, stepTime;
 
     @Override
     public void loop() {
 
-        stepSize = servoRate * servoTimer.seconds() * gamepad1.left_stick_x;
-        //servoTimer.reset();
+        stepTime = servoTimer.seconds();
+        servoTimer.reset();
+
+        stepSize = servoRate * stepTime * gamepad1.left_stick_x;
         servoLeftPos = Range.clip(stepSize + servoLeftPos, 0, 1);
         leftServo.setPosition(servoLeftPos);
-
-        stepSize = servoRate * servoTimer.seconds() * gamepad1.right_stick_x;
-
+        stepSize = servoRate * stepTime * gamepad1.right_stick_x;
         servoRightPos = Range.clip(stepSize + servoRightPos, 0, 1);
         rightServo.setPosition(servoRightPos);
 
-        servoTimer.reset();
 /*
         if (gamepad1.y)
             armMotor.setPower(1);
-
         else if (gamepad1.a)
             armMotor.setPower(-1);
-
         else
             armMotor.setPower(0);
 */
