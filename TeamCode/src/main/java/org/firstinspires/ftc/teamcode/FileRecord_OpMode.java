@@ -72,6 +72,12 @@ public class FileRecord_OpMode extends OpMode
             requestOpModeStop();
         }
 
+        byte[] buffer = "Test 1 Bytes".getBytes();
+        try {
+            outputStream.write(buffer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         telemetry.addData("Status", "Initialized");
     }
