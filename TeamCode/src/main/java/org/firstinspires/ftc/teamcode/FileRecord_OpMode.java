@@ -105,6 +105,7 @@ public class FileRecord_OpMode extends OpMode
         loopInterval = loopTimer.seconds();
         loopTimer.reset();
 
+        recordText(runtime.toString() + ", ", outputStream);
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Loop Time: ", loopInterval.toString());
