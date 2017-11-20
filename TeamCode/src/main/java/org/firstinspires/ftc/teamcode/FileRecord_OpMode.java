@@ -72,12 +72,13 @@ public class FileRecord_OpMode extends OpMode
             requestOpModeStop();
         }
 
-        byte[] buffer = "Test 1 Bytes".getBytes();
-        try {
-            outputStream.write(buffer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        recordText("Hello ", outputStream);
+        recordText("there ", outputStream);
+        recordText("this ", outputStream);
+        recordText("is ", outputStream);
+        recordText("a ", outputStream);
+        recordText("test.", outputStream);
+
 
         telemetry.addData("Status", "Initialized");
     }
@@ -122,4 +123,16 @@ public class FileRecord_OpMode extends OpMode
         }
     }
 
+
+    /*
+     *  Text recorder function
+     */
+    private void recordText(String string, FileOutputStream outputStream){
+
+        try {
+            outputStream.write(string.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
