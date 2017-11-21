@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -105,7 +106,8 @@ public class FileRecord_OpMode extends OpMode
         loopInterval = loopTimer.seconds();
         loopTimer.reset();
 
-        recordText(runtime.toString() + ", ", outputStream);
+
+        recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, 0, outputStream);
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Loop Time: ", loopInterval.toString());
@@ -137,5 +139,15 @@ public class FileRecord_OpMode extends OpMode
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void recordODSDiagnostic(String name, double time, double distance, double value,
+                                     FileOutputStream outputStream) {
+        recordText("name: " + name + ", ", outputStream);
+        recordText("time: " + Double.toString(time) + ", ", outputStream);
+        recordText("distance: " + Double.toString(distance) + ", ", outputStream);
+        recordText("value: " + Double.toString(value) + ", ", outputStream);
+        recordText(",," + System.getProperty("line.separator") , outputStream);
+
     }
 }
