@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -59,6 +60,9 @@ public class FileRecord_OpMode extends OpMode
     private ElapsedTime loopTimer = new ElapsedTime();
     private FileOutputStream outputStream;
 
+    // Hardware
+    OpticalDistanceSensor odsSensor;
+
 
 
     /*
@@ -68,14 +72,18 @@ public class FileRecord_OpMode extends OpMode
     public void init() {
 
         try {
+            odsSensor = hardwareMap.get(OpticalDistanceSensor.class, "odsSensor");
+        } catch (Exception e ) {
+            telemetry.addData("Error:", "Unable to find odsSensor");
+        }
+
+        try {
             telemetry.addData("File Location", hardwareMap.appContext.getFilesDir());
             outputStream = hardwareMap.appContext.openFileOutput("fileTest", Context.MODE_PRIVATE);
         } catch (Exception e) {
             e.printStackTrace();
             requestOpModeStop();
         }
-
-        recordText("Test Two Start" + System.getProperty("line.separator"), outputStream);
 
         telemetry.addData("Status", "Initialized");
     }
@@ -106,8 +114,13 @@ public class FileRecord_OpMode extends OpMode
         loopInterval = loopTimer.seconds();
         loopTimer.reset();
 
-
-        recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, 0, outputStream);
+        try {
+            recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, odsSensor.getRawLightDetected(),
+                                odsSensor.getLightDetected(), outputStream);
+        } catch (Exception e) {
+            telemetry.addData("Cannot read from ODS sensor", "");
+            recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, 0,0, outputStream);
+        }
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Loop Time: ", loopInterval.toString());
@@ -141,12 +154,14 @@ public class FileRecord_OpMode extends OpMode
         }
     }
 
-    private void recordODSDiagnostic(String name, double time, double distance, double value,
+    private void recordODSDiagnostic(String name, double time, double distance,
+                                     double valueRaw, double valueScaled,
                                      FileOutputStream outputStream) {
         recordText("name: " + name + ", ", outputStream);
         recordText("time: " + Double.toString(time) + ", ", outputStream);
         recordText("distance: " + Double.toString(distance) + ", ", outputStream);
-        recordText("value: " + Double.toString(value) + ", ", outputStream);
+        recordText("valueRaw: " + Double.toString(valueRaw) + ", ", outputStream);
+        recordText("valueScaled: " + Double.toString(valueScaled) + ", ", outputStream);
         recordText(",," + System.getProperty("line.separator") , outputStream);
 
     }
