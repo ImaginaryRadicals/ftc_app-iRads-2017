@@ -79,7 +79,7 @@ public class FileRecord_OpMode extends OpMode
 
         try {
             telemetry.addData("File Location", hardwareMap.appContext.getFilesDir());
-            outputStream = hardwareMap.appContext.openFileOutput("fileTest", Context.MODE_PRIVATE);
+            outputStream = hardwareMap.appContext.openFileOutput("odsRecording", Context.MODE_PRIVATE);
         } catch (Exception e) {
             e.printStackTrace();
             requestOpModeStop();
@@ -117,6 +117,7 @@ public class FileRecord_OpMode extends OpMode
         try {
             recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, odsSensor.getRawLightDetected(),
                                 odsSensor.getLightDetected(), outputStream);
+            telemetry.addData("scaledODS", odsSensor.getLightDetected());
         } catch (Exception e) {
             telemetry.addData("Cannot read from ODS sensor", "");
             recordODSDiagnostic("ODSLevel", runtime.seconds(), 0, 0,0, outputStream);
