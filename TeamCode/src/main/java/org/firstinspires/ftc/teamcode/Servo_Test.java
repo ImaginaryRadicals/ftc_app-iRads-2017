@@ -50,7 +50,7 @@ public class Servo_Test extends OpMode
 
     private double servoLeftPos = 0;
     private double servoRightPos = 0;
-    private double servoRate = 1;
+    private double servoRate = 5;
     private ElapsedTime servoTimer = new ElapsedTime();
 
 
