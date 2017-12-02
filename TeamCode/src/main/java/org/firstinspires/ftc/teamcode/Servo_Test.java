@@ -50,7 +50,7 @@ public class Servo_Test extends OpMode
 
     private double servoLeftPos = 0;
     private double servoRightPos = 0;
-    private double servoRate = 5;
+    private double servoRate = 1;
     private ElapsedTime servoTimer = new ElapsedTime();
 
 
@@ -66,6 +66,7 @@ public class Servo_Test extends OpMode
        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 */
        leftServo = hardwareMap.get(Servo.class, "leftServo");
+       leftServo.setDirection(Servo.Direction.REVERSE);
        leftServo.setPosition(0);
        rightServo = hardwareMap.get(Servo.class, "rightServo");
        rightServo.setPosition(0);
