@@ -8,13 +8,16 @@ public class Constants {
 
     public static final double MID_SERVO            =  0.5 ;
 
-    // public doubles for the left and right GRIPPER
-    public static final double LEFT_GRIPPER_OPEN = 0.0;
-    public static final double LEFT_GRIPPER_CLOSED = 0.66;
-    public static final double RIGHT_GRIPPER_OPEN = 0.0;
-    public static final double RIGHT_GRIPPER_CLOSED = 0.66;
-    public static final double INITIAL_LEFT_GRIPPER_POS = LEFT_GRIPPER_OPEN;
-    public static final double INITIAL_RIGHT_GRIPPER_POS = RIGHT_GRIPPER_OPEN;
+    // public doubles for the left and right CLAW
+    public static final double LEFT_CLAW_OPEN = 0.25;
+    public static final double RIGHT_CLAW_OPEN = 0.25;
+    public static final double LEFT_CLAW_RELEASE = 0.08;
+    public static final double RIGHT_CLAW_RELEASE = 0.08;
+
+    public static final double LEFT_CLAW_CLOSED = 0.0;
+    public static final double RIGHT_CLAW_CLOSED = 0.0;
+    public static final double INITIAL_LEFT_CLAW_POS = 1.0;
+    public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
 
     public static final double DRIVE_WHEEL_DIAMETER_INCHES  =  4;
 
