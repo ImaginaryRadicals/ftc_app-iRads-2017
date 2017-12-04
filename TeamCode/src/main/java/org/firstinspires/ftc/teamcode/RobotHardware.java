@@ -169,6 +169,38 @@ public abstract class RobotHardware extends OpMode {
     }
 
 
+    /**
+     * Get the amount of light detected by the optical distance sensor.
+     * @param sensor The sensor to read.
+     * @return The light level detected on a scale from 0.0 to 1.0.
+     */
+    protected double getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName sensor) {
+        OpticalDistanceSensor ods = allOpticalDistanceSensors.get(sensor.ordinal());
+        if (ods == null) {
+            telemetry.addData("Optical Distance Sensor Missing", sensor.name());
+            return 0;
+        } else {
+            return ods.getLightDetected();
+        }
+    }
+
+
+    /**
+     * Sets the LED power for the optical distance sensor.
+     * @param sensor The ods to set the LED power.
+     * @param enabled Whether to turn the LED on.
+     */
+    protected void setOpticalDistanceSensorLedEnable(OpticalDistanceSensorName sensor,
+                                                     boolean enabled) {
+        OpticalDistanceSensor ods = allOpticalDistanceSensors.get(sensor.ordinal());
+        if (ods == null) {
+            telemetry.addData("Optical Distance Sensor Missing", sensor.name());
+        } else {
+            ods.enableLed(enabled);
+        }
+    }
+
+
     // The color sensors on the robot.
     protected enum ColorSensorName {
         JEWEL_COLOR,
@@ -324,6 +356,9 @@ public abstract class RobotHardware extends OpMode {
         }
         for (ColorSensorName s : ColorSensorName.values()) {
             setColorSensorLedEnabled(s, false);
+        }
+        for (OpticalDistanceSensorName ods : OpticalDistanceSensorName.values()) {
+            setOpticalDistanceSensorLedEnable(ods, false);
         }
     }
 
