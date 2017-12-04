@@ -38,6 +38,11 @@ public abstract class RobotHardware extends OpMode {
     // Per robot tuning parameters.
     // private String vuforiaLicenseKey;
 
+    // Execution cycle period monitor.
+    private ElapsedTime period  = new ElapsedTime();
+    private Vector pastPeriods  = new Vector();
+
+
     // The motors on the robot.
     public enum MotorName {
         DRIVE_FRONT_LEFT,
@@ -149,6 +154,13 @@ public abstract class RobotHardware extends OpMode {
         setAngle(ServoName.CLAW_RIGHT, Constants.INITIAL_RIGHT_CLAW_POS);
     }
 
+    // Set servo claw to given position
+    protected void setPositionClaw(double position) {
+        setAngle(ServoName.CLAW_LEFT, position);
+        setAngle(ServoName.CLAW_RIGHT, position);
+    }
+
+
 
     // The Optical Distance Sensors on the robot.
     protected enum OpticalDistanceSensorName {
@@ -215,6 +227,23 @@ public abstract class RobotHardware extends OpMode {
 
 
     /**
+     * Should be executed at the beginning of loop() function.
+     * Adds the most recent period length (in seconds) to a vector.
+     * then, calculates the average period length.
+     * @return Average period of past execution cycles.
+     */
+    public double periodSec(){
+
+        pastPeriods.add(period.time());
+        period.reset();
+        if (pastPeriods.size()>= 30) {
+            pastPeriods.remove(0);
+        }
+        return VectorMath.average(pastPeriods);
+    }
+
+
+    /**
      * Initialize the hardware handles.
      */
     public void init() {
@@ -232,6 +261,7 @@ public abstract class RobotHardware extends OpMode {
                 allMotors.add(null);
             }
         }
+        // Set motor directions.
         try {
             allMotors.get(MotorName.DRIVE_FRONT_RIGHT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
             allMotors.get(MotorName.DRIVE_BACK_RIGHT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
@@ -247,6 +277,12 @@ public abstract class RobotHardware extends OpMode {
                 telemetry.addData("Servo Missing", s.name());
                 allServos.add(null);
             }
+        }
+        // Set servo direction
+        try {
+            allServos.get(ServoName.CLAW_LEFT.ordinal()).setDirection(Servo.Direction.REVERSE);
+        } catch (Exception e) {
+            telemetry.addData("Unable to set left servo direction", "");
         }
 
         allColorSensors = new ArrayList<ColorSensor>();
