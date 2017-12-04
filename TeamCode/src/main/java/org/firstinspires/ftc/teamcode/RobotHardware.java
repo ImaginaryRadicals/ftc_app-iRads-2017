@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 import org.firstinspires.ftc.teamcode.Utilities.VectorMath;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
@@ -161,6 +162,42 @@ public abstract class RobotHardware extends OpMode {
         JEWEL_COLOR,
     }
 
+    /**
+     * Gets the color value on the sensor.
+     * @param sensor The sensor to read.
+     * @param color The color channel to read intensity.
+     */
+    protected int getColorSensor(ColorSensorName sensor, Color.Channel color) {
+        ColorSensor s = allColorSensors.get(sensor.ordinal());
+        if (s == null) {
+            telemetry.addData("Color Sensor Missing", sensor.name());
+            return 0;
+        }
+
+        switch (color) {
+            case RED: return s.red();
+            case GREEN: return s.green();
+            case BLUE: return s.blue();
+            case ALPHA: return s.alpha();
+            default: return 0;
+        }
+    }
+
+    /**
+     * Sets the LED power for the color sensor.
+     * @param sensor The sensor to set the LED power.
+     * @param enabled Whether to turn the LED on.
+     */
+    protected void setColorSensorLedEnabled(ColorSensorName sensor,
+                                         boolean enabled) {
+        ColorSensor s = allColorSensors.get(sensor.ordinal());
+        if (s == null) {
+            telemetry.addData("Color Sensor Missing", sensor.name());
+        } else {
+            s.enableLed(enabled);
+        }
+    }
+
 
     // Possible starting positions.
     protected enum StartPosition {
@@ -249,9 +286,9 @@ public abstract class RobotHardware extends OpMode {
         for (MotorName m : MotorName.values()) {
             setPower(m, 0);
         }
-//        for (ColorSensorName s : ColorSensorName.values()) {
-//            setColorSensorLedEnabled(s, false);
-//        }
+        for (ColorSensorName s : ColorSensorName.values()) {
+            setColorSensorLedEnabled(s, false);
+        }
     }
 
 
