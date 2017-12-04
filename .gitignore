@@ -26,3 +26,8 @@ build/
 
 *ASUS_PC_01*
 
+# Windows Shortcut Files
+*.lnk
+
+# Vim temp files
+*.swp
