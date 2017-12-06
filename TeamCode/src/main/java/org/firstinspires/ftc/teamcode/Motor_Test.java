@@ -17,9 +17,10 @@ public class Motor_Test  extends RobotHardware {
         if (gamepad1.left_trigger > 0.1) {
             setPower(MotorName.ARM_MOTOR, gamepad1.left_trigger);
         } else if (gamepad1.right_trigger > 0.1) {
-            setPower(MotorName.ARM_MOTOR, gamepad1.right_trigger);
+            setPower(MotorName.ARM_MOTOR, -gamepad1.right_trigger);
         }
 
+       // telemetry.addData("Arm Pos.", ARM_MOTOR.position.toString())
 
 
     }
