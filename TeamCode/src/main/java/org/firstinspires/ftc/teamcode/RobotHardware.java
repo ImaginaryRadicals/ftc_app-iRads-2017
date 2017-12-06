@@ -49,7 +49,6 @@ public abstract class RobotHardware extends OpMode {
         DRIVE_FRONT_RIGHT,
         DRIVE_BACK_LEFT,
         DRIVE_BACK_RIGHT,
-        ARM_LIFT,
         ARM_MOTOR,
     }
 
@@ -187,7 +186,7 @@ public abstract class RobotHardware extends OpMode {
 
     // The Optical Distance Sensors on the robot.
     protected enum OpticalDistanceSensorName {
-        ODS_LEFT,
+        //ODS_LEFT,
         ODS_RIGHT,
     }
 
