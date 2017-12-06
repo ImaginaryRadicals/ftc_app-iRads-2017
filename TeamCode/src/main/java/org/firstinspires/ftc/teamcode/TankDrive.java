@@ -14,34 +14,31 @@ import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 //@Disabled
 public class TankDrive extends RobotHardware {
 
-    Controller controller = new Controller(gamepad1);
-
     @Override
     public void loop() {
 
-        // Keep button one shot triggers updated.
-        controller.update();
-
         //Drive Motor control
-        setDriveForTank(-controller.left_stick_y, -controller.right_stick_y);
+        setDriveForTank(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
 
 
         // Arm Control
-        if (controller.dpadUp()) {
-            setPower(MotorName.ARM_MOTOR, 1);
-        }else if (controller.dpadDown()) {
-            setPower(MotorName.ARM_MOTOR, -1);
+        if (gamepad1.dpad_up) {
+            setPower(MotorName.ARM_MOTOR, .2);
+        }else if (gamepad1.dpad_down) {
+            setPower(MotorName.ARM_MOTOR, -.2);
         } else {
             setPower(MotorName.ARM_MOTOR, 0);
         }
 
         //Claw Control
-        if (controller.X()) {
+        if (gamepad1.x) {
             openClaw();
-        } else if (controller.Y()) {
+        } else if (gamepad1.y) {
             closeClaw();
-        } else if (controller.B()) {
+        } else if (gamepad1.b) {
             slightOpenClaw();
+        } else if (gamepad1.a) {
+            setPositionClaw(gamepad1.left_trigger);
         }
 
 
