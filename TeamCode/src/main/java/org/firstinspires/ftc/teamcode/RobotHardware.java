@@ -147,6 +147,7 @@ public abstract class RobotHardware extends OpMode {
         if (s == null) {
             telemetry.addData("Motor Missing", motor.name());
         } else {
+            s.setPower(1.0);
             s.setTargetPosition(position);
         }
     }
