@@ -25,7 +25,17 @@ public class Manual extends RobotHardware {
             lowerArm();
         }
 
+        //Claw Control
+        if (gamepad1.x) {
+            openClaw();
+        } else if (gamepad1.y) {
+            closeClaw();
+        } else if (gamepad1.b) {
+            slightOpenClaw();
+        }
 
+
+//                  BTW RYDER WAS HERE!!!!!
 
 
     }
