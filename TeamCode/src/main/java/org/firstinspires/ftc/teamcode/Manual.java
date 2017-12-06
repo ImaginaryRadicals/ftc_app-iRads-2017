@@ -1,13 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 
 /**
  * Created by ryderswan on 12/5/17.
  */
 
+
+@TeleOp (name="Manual Mecanum", group="Manual")
+//@Disabled
 public class Manual extends RobotHardware {
-    @Override
 
     public void loop() {
 
