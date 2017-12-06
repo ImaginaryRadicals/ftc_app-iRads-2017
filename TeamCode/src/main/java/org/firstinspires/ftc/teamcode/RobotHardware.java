@@ -69,6 +69,21 @@ public abstract class RobotHardware extends OpMode {
     }
 
     /**
+     * Gets the encoder value of the motor.
+     * @param motor MotorName enum value.
+     * @return integer encoder position in ticks.
+     */
+    protected int getEncoderValue(MotorName motor) {
+        DcMotor m = allMotors.get(motor.ordinal());
+        if (m == null) {
+            telemetry.addData("Motor Missing", motor.name());
+            return 0;
+        } else {
+            return m.getCurrentPosition();
+        }
+    }
+
+    /**
      * Sets the drive chain power.
      * @param left The power for the left two motors.
      * @param right The power for the right two motors.
