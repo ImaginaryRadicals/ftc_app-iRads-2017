@@ -50,6 +50,7 @@ public abstract class RobotHardware extends OpMode {
         DRIVE_BACK_LEFT,
         DRIVE_BACK_RIGHT,
         ARM_LIFT,
+        ARM_MOTOR,
     }
 
     // Motor methods
@@ -108,6 +109,16 @@ public abstract class RobotHardware extends OpMode {
     }
 
 
+    // Arm positions
+    protected void raiseArm(){
+        setTargetPosition(MotorName.ARM_MOTOR, Constants.RAISE_ARM_POSITION);
+    }
+    protected void lowerArm(){
+        setTargetPosition(MotorName.ARM_MOTOR, Constants.LOWER_ARM_POSITION);
+    }
+
+
+
     // The servos on the robot.
     protected enum ServoName {
         CLAW_LEFT,
@@ -129,6 +140,17 @@ public abstract class RobotHardware extends OpMode {
             s.setPosition(position);
         }
     }
+
+    //Same thing as the Servo one, but for a motor
+    protected void setTargetPosition(MotorName motor, int position) {
+        DcMotor s = allMotors.get(motor.ordinal());
+        if (s == null) {
+            telemetry.addData("Motor Missing", motor.name());
+        } else {
+            s.setTargetPosition(position);
+        }
+    }
+
 
     // Opens the servo claw
     protected void openClaw() {

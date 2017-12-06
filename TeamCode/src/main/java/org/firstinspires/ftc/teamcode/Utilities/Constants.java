@@ -19,6 +19,9 @@ public class Constants {
     public static final double INITIAL_LEFT_CLAW_POS = 1.0;
     public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
 
+    public static final int RAISE_ARM_POSITION = 100;
+    public static final int LOWER_ARM_POSITION = 50;
+
     public static final double DRIVE_WHEEL_DIAMETER_INCHES  =  4;
 
     public static final double MM_PER_IN = 25.4f;
