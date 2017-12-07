@@ -23,9 +23,7 @@ public class Manual extends RobotHardware {
                 gamepad1.left_stick_x, gamepad1.left_stick_y,
                 gamepad1.right_stick_x, gamepad1.right_stick_y));
 
-
-
-        // Arm Control
+        // Arm Control Buttons
         if (gamepad1.dpad_up) {
             setPower(MotorName.ARM_MOTOR, Constants.RAISE_ARM_SPEED);
         }else if (gamepad1.dpad_down) {
@@ -33,6 +31,19 @@ public class Manual extends RobotHardware {
         }else {
             setPower(MotorName.ARM_MOTOR, 0.0);
         }
+
+        // Arm Control Analog
+        double left_trigger; // Arm Dowm
+        double right_trigger; // Arm Up
+
+        left_trigger =  - gamepad1.left_trigger;
+        right_trigger =  gamepad1.right_trigger;
+
+        setPower(MotorName.ARM_MOTOR, left_trigger ) ;
+        setPower(MotorName.ARM_MOTOR, right_trigger);
+
+
+
 
         //Claw Control
         if (gamepad1.x) {
