@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Utilities.Constants;
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 
 /**
@@ -26,9 +27,11 @@ public class Manual extends RobotHardware {
 
         // Arm Control
         if (gamepad1.dpad_up) {
-            raiseArm();
+            setPower(MotorName.ARM_MOTOR, Constants.RAISE_ARM_SPEED);
         }else if (gamepad1.dpad_down) {
-            lowerArm();
+            setPower(MotorName.ARM_MOTOR, Constants.LOWER_ARM_SPEED);
+        }else {
+            setPower(MotorName.ARM_MOTOR, 0.0);
         }
 
         //Claw Control
@@ -39,9 +42,6 @@ public class Manual extends RobotHardware {
         } else if (gamepad1.b) {
             slightOpenClaw();
         }
-
-
-//                  BTW RYDER WAS HERE!!!!!
 
 
     }
