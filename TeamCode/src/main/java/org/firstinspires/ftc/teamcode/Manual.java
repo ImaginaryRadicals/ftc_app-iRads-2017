@@ -14,8 +14,9 @@ import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 @TeleOp (name="Manual Mecanum", group="Manual")
 //@Disabled
 public class Manual extends RobotHardware {
-    @Override
+    public boolean use_telemetry = true;
 
+    @Override
     public void loop() {
 
         //Drive Motor control
@@ -23,9 +24,18 @@ public class Manual extends RobotHardware {
                 gamepad1.left_stick_x, gamepad1.left_stick_y,
                 gamepad1.right_stick_x, gamepad1.right_stick_y);
 
-        if (!gamepad1.start) {
+        if (gamepad1.start)
+        {
+            // Arm Control Analog
+            double left_trigger = gamepad1.left_trigger; // Arm Dowm
+            double right_trigger = gamepad1.right_trigger; // Arm Up
 
-
+            if (left_trigger > 0.1) {
+                setPower(MotorName.ARM_MOTOR, -(0.1 + 0.9*left_trigger));
+            } else if (right_trigger > 0.1) {
+                setPower(MotorName.ARM_MOTOR, (0.1 + 0.9*right_trigger));
+            }
+        } else {
             // Arm Control Buttons
             if (gamepad1.dpad_up) {
                 setPower(MotorName.ARM_MOTOR, Constants.RAISE_ARM_SPEED);
@@ -34,24 +44,7 @@ public class Manual extends RobotHardware {
             } else {
                 setPower(MotorName.ARM_MOTOR, 0.0);
             }
-
-        } else {
-            // Arm Control Analog
-            double left_trigger; // Arm Dowm
-            double right_trigger; // Arm Up
-
-            left_trigger = -gamepad1.left_trigger;
-            right_trigger = gamepad1.right_trigger;
-
-            if ( Math.abs(left_trigger) > 0.1) {
-                setPower(MotorName.ARM_MOTOR, left_trigger);
-            } else {
-                setPower(MotorName.ARM_MOTOR, right_trigger);
-            }
-
         }
-
-
 
         //Claw Control
         if (gamepad1.x) {
@@ -62,7 +55,10 @@ public class Manual extends RobotHardware {
             slightOpenClaw();
         }
 
-
+        if (use_telemetry)
+        {
+            telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+        }
     }
 
 

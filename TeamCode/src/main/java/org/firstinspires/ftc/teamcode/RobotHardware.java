@@ -349,6 +349,13 @@ public abstract class RobotHardware extends OpMode {
             telemetry.addData("Unable to set right motor direction","");
         }
 
+        // Set arm motor to brake
+        try {
+            allMotors.get(MotorName.ARM_MOTOR.ordinal()).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        } catch (Exception e){
+            telemetry.addData("Unable to set arm motor to zero power brake", "");
+        }
+
         allServos = new ArrayList<Servo>();
         for (ServoName s : ServoName.values()) {
             try {
