@@ -131,3 +131,22 @@ public class Mecanum {
       }
     }
 }
+
+
+    public static Wheels simpleJoystickToWheels(double leftStickX,
+                                                double leftStickY,
+                                                double rightStickX,
+                                                double rightStickY) {
+        double forward = -leftStickY;
+        double leftStrafe = -leftStickX;
+        double rotateCCW = -rightStickX;
+
+        double frontLeft = forward - leftStrafe - rotateCCW;
+        double frontRight = forward + leftStrafe + rotateCCW;
+        double backLeft = forward + leftStrafe - rotateCCW;
+        double backRight = forward - leftStrafe + rotateCCW;
+
+        return new Wheels(frontLeft, frontRight,
+                backLeft, backRight);
+    }
+}

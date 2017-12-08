@@ -19,9 +19,9 @@ public class Manual extends RobotHardware {
     public void loop() {
 
         //Drive Motor control
-        setDriveForMecanumForSpeed(Mecanum.joystickToMotion(
+        setDriveForSimpleMecanum(
                 gamepad1.left_stick_x, gamepad1.left_stick_y,
-                gamepad1.right_stick_x, gamepad1.right_stick_y));
+                gamepad1.right_stick_x, gamepad1.right_stick_y);
 
         if (!gamepad1.start) {
 
