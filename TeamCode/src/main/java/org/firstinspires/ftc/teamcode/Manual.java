@@ -15,15 +15,23 @@ import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 //@Disabled
 public class Manual extends RobotHardware {
     public boolean use_telemetry = true;
+    public boolean forward_drive = true;
 
     @Override
     public void loop() {
 
         //Drive Motor control
-        setDriveForSimpleMecanum(
-                gamepad1.left_stick_x, gamepad1.left_stick_y,
-                gamepad1.right_stick_x, gamepad1.right_stick_y);
-
+        forward_drive = !gamepad1.right_bumper;
+        if(forward_drive) {
+            setDriveForSimpleMecanum(
+                    gamepad1.left_stick_x, gamepad1.left_stick_y,
+                    gamepad1.right_stick_x, gamepad1.right_stick_y);
+        }
+        else{
+            setDriveForSimpleMecanum(
+                    -gamepad1.left_stick_x, -gamepad1.left_stick_y,
+                    gamepad1.right_stick_x, gamepad1.right_stick_y);
+        }
         if (gamepad1.start)
         {
             // Arm Control Analog
