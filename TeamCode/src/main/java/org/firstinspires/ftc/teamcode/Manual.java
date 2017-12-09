@@ -20,7 +20,8 @@ public class Manual extends RobotHardware {
     private MecanumNavigation mecanumNavigation;
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
-    private boolean is_analog_arm_control = false;
+    private boolean exponential_input = false;
+    private boolean analog_arm_control = false;
 
     @Override
     public void init() {
@@ -49,32 +50,59 @@ public class Manual extends RobotHardware {
                         getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
               mecanumNavigation.displayPosition();
 
-        // Reset navigation position to zero.
-        if(controller.leftBumper() && controller.YOnce()) {
-            mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0,0,0));
+
+        // Chord Commands
+        if(controller.leftBumper()) {
+
+            // Reset navigation position to zero.
+            if (controller.YOnce()) {
+                mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0, 0, 0));
+            }
+            // Toggle analog arm control.
+            if (controller.XOnce()) {
+                analog_arm_control = ! analog_arm_control;
+            }
+            // Toggle exponential input
+            if (controller.BOnce()) {
+                exponential_input = ! exponential_input;
+            }
+            // Cage claw
+            if (controller.AOnce()) {
+                storeClaw();
+            }
+
+        } else {
+            // Non-chord robot inputs
+            robotControls();
         }
 
 
+        if (use_telemetry)
+        {
+            //telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+            for (MotorName m : MotorName.values()) {
+                telemetry.addData(m.name(), getEncoderValue(m));
+            }
+            telemetry.addData("Exponential", exponential_input);
+        }
+    }
+
+    private void robotControls() {
 
         //Drive Motor control
         forward_drive = !gamepad1.right_bumper;
-        if(forward_drive) {
-            setDriveForSimpleMecanum(
-                    gamepad1.left_stick_x, gamepad1.left_stick_y,
-                    gamepad1.right_stick_x, gamepad1.right_stick_y);
-        }
-        else{
-            setDriveForSimpleMecanum(
-                    -gamepad1.left_stick_x, -gamepad1.left_stick_y,
-                    gamepad1.right_stick_x, gamepad1.right_stick_y);
-        }
+        double sign, exponential;
+        sign = forward_drive ? 1 : -1;
+        exponential = exponential_input ? 3 : 1;
+        setDriveForSimpleMecanum(
+                sign * Math.pow(gamepad1.left_stick_x, exponential),
+                sign * Math.pow(gamepad1.left_stick_y,exponential),
+                Math.pow(gamepad1.right_stick_x,exponential),
+                Math.pow(gamepad1.right_stick_y,exponential));
 
 
-        // Toggle analog arm control.
-        if (controller.leftBumper() && controller.XOnce()) {
-            is_analog_arm_control = ! is_analog_arm_control;
-        }
-        if (is_analog_arm_control)
+        // Arm controls
+        if (analog_arm_control)
         {
             // Arm Control Analog
             double left_trigger = gamepad1.left_trigger; // Arm Dowm
@@ -105,16 +133,11 @@ public class Manual extends RobotHardware {
             closeClaw();
         } else if (gamepad1.b) {
             slightOpenClaw();
+        } else if (gamepad1.a && !analog_arm_control) {
+            setPositionClaw(gamepad1.right_trigger);
         }
 
-        if (use_telemetry)
-        {
-            telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
 
-            for (MotorName m : MotorName.values()) {
-                telemetry.addData(m.name(), getEncoderValue(m));
-            }
-        }
     }
 
 
