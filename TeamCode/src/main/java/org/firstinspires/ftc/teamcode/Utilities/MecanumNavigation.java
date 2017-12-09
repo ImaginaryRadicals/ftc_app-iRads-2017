@@ -39,7 +39,7 @@ public class MecanumNavigation {
 
         Navigation2D deltaPosition = deltaPositionFromDeltaWheelTicks(deltaWheelTicks);
         this.previousPosition = this.currentPosition;
-        this.currentPosition.add(deltaPosition);
+        this.currentPosition.addRelativeDeltaToAbsolute(deltaPosition);
     }
 
     public void displayPosition() {
@@ -108,7 +108,7 @@ public class MecanumNavigation {
         }
 
         public void addRelativeDeltaToAbsolute(Navigation2D deltaRelativeNav) {
-            double PHASE_ROTATION = - Math.PI / 2;
+            double PHASE_ROTATION = 0;
 
             double absoluteX = this.x;
             double absoluteY = this.y;
