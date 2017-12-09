@@ -131,11 +131,16 @@ public class Mecanum {
       }
     }
 
-
-    public static Wheels simpleJoystickToWheels(double leftStickX,
-                                                double leftStickY,
-                                                double rightStickX,
-                                                double rightStickY) {
+    /**
+     * Calculates mecanum Wheels power using simplistic calculations.
+     * @param leftStickX Unmodified Gamepad leftStickX inputs.
+     * @param leftStickY Unmodified Gamepad leftStickY inputs.
+     * @param rightStickX Unmodified Gamepad rightStickX inputs.
+     * @param rightStickY Unmodified Gamepad rightStickY inputs.
+     * @return Wheels object with calculated drive powers.
+     */
+    public static Wheels simpleJoystickToWheels(double leftStickX, double leftStickY,
+                                                double rightStickX, double rightStickY) {
         double forward = -leftStickY;
         double leftStrafe = -leftStickX;
         double rotateCCW = -rightStickX;

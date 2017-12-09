@@ -94,10 +94,16 @@ public abstract class RobotHardware extends OpMode {
         setPower(MotorName.DRIVE_FRONT_RIGHT, right);
         setPower(MotorName.DRIVE_BACK_RIGHT, right);
     }
-    protected void setDriveForSimpleMecanum(double leftStickX,
-                                            double leftStickY,
-                                            double rightStickX,
-                                            double rightStickY) {
+
+    /**
+     * Sets mecanum drive chain power using simplistic calculations.
+     * @param leftStickX Unmodified Gamepad leftStickX inputs.
+     * @param leftStickY Unmodified Gamepad leftStickY inputs.
+     * @param rightStickX Unmodified Gamepad rightStickX inputs.
+     * @param rightStickY Unmodified Gamepad rightStickY inputs.
+     */
+    protected void setDriveForSimpleMecanum(double leftStickX, double leftStickY,
+                                            double rightStickX, double rightStickY) {
         Mecanum.Wheels wheels = Mecanum.simpleJoystickToWheels (leftStickX, leftStickY, rightStickX, rightStickY);
         setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
         setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
