@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 import org.firstinspires.ftc.teamcode.Utilities.Controller;
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
+import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 
 /**
  * Created by ryderswan on 12/5/17.
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 //@Disabled
 public class Manual extends RobotHardware {
     private Controller controller = null;
+    private MecanumNavigation mecanumNavigation;
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
     private boolean is_analog_arm_control = false;
@@ -24,12 +26,28 @@ public class Manual extends RobotHardware {
     public void init() {
         super.init();
         controller = new Controller(gamepad1);
+        mecanumNavigation = new MecanumNavigation(this,
+                new MecanumNavigation.DriveTrainMecanum(
+                        Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
+                        Constants.DRIVE_WHEEL_DIAMETER_INCHES, Constants.DRIVE_WHEEL_STEPS_PER_ROT));
+        mecanumNavigation.initialize(new MecanumNavigation.Navigation2D(0,0,0),
+                new MecanumNavigation.WheelTicks(getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
+                        getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
+                        getEncoderValue(MotorName.DRIVE_BACK_LEFT),
+                        getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
     }
 
     @Override
     public void loop() {
         // Keep controller rising edge trigger updated.
         controller.update();
+        // Update mecanum encoder navigation
+        mecanumNavigation.update(new MecanumNavigation.WheelTicks(
+                        getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
+                        getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
+                        getEncoderValue(MotorName.DRIVE_BACK_LEFT),
+                        getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
+              mecanumNavigation.displayPosition();
 
         //Drive Motor control
         forward_drive = !gamepad1.right_bumper;
