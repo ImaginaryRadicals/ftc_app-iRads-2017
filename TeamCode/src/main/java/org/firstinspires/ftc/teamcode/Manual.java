@@ -49,6 +49,13 @@ public class Manual extends RobotHardware {
                         getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
               mecanumNavigation.displayPosition();
 
+        // Reset navigation position to zero.
+        if(controller.leftBumper() && controller.YOnce()) {
+            mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0,0,0));
+        }
+
+
+
         //Drive Motor control
         forward_drive = !gamepad1.right_bumper;
         if(forward_drive) {
@@ -62,8 +69,9 @@ public class Manual extends RobotHardware {
                     gamepad1.right_stick_x, gamepad1.right_stick_y);
         }
 
+
         // Toggle analog arm control.
-        if (controller.leftBumperOnce()) {
+        if (controller.leftBumper() && controller.XOnce()) {
             is_analog_arm_control = ! is_analog_arm_control;
         }
         if (is_analog_arm_control)
@@ -102,6 +110,10 @@ public class Manual extends RobotHardware {
         if (use_telemetry)
         {
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+
+            for (MotorName m : MotorName.values()) {
+                telemetry.addData(m.name(), getEncoderValue(m));
+            }
         }
     }
 
