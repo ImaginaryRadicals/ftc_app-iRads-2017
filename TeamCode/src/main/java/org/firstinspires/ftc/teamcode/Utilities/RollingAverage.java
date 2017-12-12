@@ -17,7 +17,7 @@ public class RollingAverage {
         signal.add(current_value);
         sum += current_value;
 
-        if (signal.size() > samples) {
+        while (signal.size() > samples) {
             // remove oldest value
             sum -= signal.get(0);
             signal.remove(0);
