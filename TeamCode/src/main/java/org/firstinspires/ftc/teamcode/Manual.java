@@ -85,21 +85,34 @@ public class Manual extends RobotHardware {
                 telemetry.addData(m.name(), getEncoderValue(m));
             }
             telemetry.addData("Exponential", exponential_input);
+            telemetry.addData("Slow", slow_mode);
         }
     }
 
     private void robotControls() {
 
         //Drive Motor control
-        forward_drive = !controller.right_stick_buttonOnce();
-        slow_mode = !controller.left_stick_buttonOnce();
+        forward_drive = !controller.left_stick_buttonOnce();
+
+        // Slow mode controls
+        if (controller.dpadLeftOnce())
+        {
+            slow_mode = !slow_mode;
+        }
+        double fast_scale = 1.0;
+        if (slow_mode)
+        {
+            fast_scale = 0.1;
+        }
+
+
         double sign, exponential, max_rate;
         sign = forward_drive ? 1 : -1;
-        max_rate = slow_mode ? 0.5 : 1;
+        //max_rate = slow_mode ? 1 : 0.5;
         exponential = exponential_input ? 3 : 1;
         setDriveForSimpleMecanum(
-                sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
-                sign * max_rate * Math.pow(gamepad1.left_stick_y,exponential),
+                sign * fast_scale * Math.pow(gamepad1.left_stick_x, exponential),
+                sign *fast_scale * Math.pow(gamepad1.left_stick_y,exponential),
                 Math.pow(gamepad1.right_stick_x,exponential),
                 Math.pow(gamepad1.right_stick_y,exponential));
 
