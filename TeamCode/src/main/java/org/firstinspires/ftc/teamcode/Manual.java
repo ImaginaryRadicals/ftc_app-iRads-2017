@@ -18,10 +18,11 @@ import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 public class Manual extends RobotHardware {
     private Controller controller = null;
     private MecanumNavigation mecanumNavigation;
-    private boolean use_telemetry = true;
-    private boolean forward_drive = true;
-    private boolean exponential_input = false;
-    private boolean analog_arm_control = false;
+    private boolean use_telemetry           = true;
+    private boolean forward_drive           = true;
+    private boolean exponential_input       = false;
+    private boolean analog_arm_control      = false;
+    private boolean slow_mode               = false;
 
     @Override
     public void init() {
@@ -90,13 +91,15 @@ public class Manual extends RobotHardware {
     private void robotControls() {
 
         //Drive Motor control
-        forward_drive = !gamepad1.right_bumper;
-        double sign, exponential;
+        forward_drive = !controller.right_stick_button();
+        slow_mode = !controller.left_stick_button();
+        double sign, exponential, max_rate;
         sign = forward_drive ? 1 : -1;
+        max_rate = slow_mode ? 0.5 : 1;
         exponential = exponential_input ? 3 : 1;
         setDriveForSimpleMecanum(
-                sign * Math.pow(gamepad1.left_stick_x, exponential),
-                sign * Math.pow(gamepad1.left_stick_y,exponential),
+                sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
+                sign * max_rate * Math.pow(gamepad1.left_stick_y,exponential),
                 Math.pow(gamepad1.right_stick_x,exponential),
                 Math.pow(gamepad1.right_stick_y,exponential));
 
