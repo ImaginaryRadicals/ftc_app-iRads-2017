@@ -92,11 +92,11 @@ public class Controller {
         right_trigger = gamepad.right_trigger;
     }
 
-    public boolean right_stick_button() {
+    public boolean rightStickButton() {
         return  0 < right_stick_button;
     }
 
-    public boolean left_stick_button() {
+    public boolean leftStickButton() {
         return  0 < left_stick_button;
     }
 
@@ -156,9 +156,13 @@ public class Controller {
         return 1 == dpad_right;
     }
 
-    public boolean right_stick_buttonOnce() { return 1 == right_stick_button; }
+    public boolean rightStickButtonOnce() {
+        return 1 == right_stick_button;
+    }
 
-    public boolean left_stick_buttonOnce() { return 1 == left_stick_button; }
+    public boolean leftStickButtonOnce() {
+        return 1 == left_stick_button;
+    }
 
     public boolean XOnce() {
         return 1 == x;

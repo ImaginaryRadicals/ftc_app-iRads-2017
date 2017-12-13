@@ -20,7 +20,7 @@ public class Manual extends RobotHardware {
     private MecanumNavigation mecanumNavigation;
     private boolean use_telemetry           = true;
     private boolean forward_drive           = true;
-    private boolean exponential_input       = false;
+    private boolean exponential_input       = true;
     private boolean analog_arm_control      = false;
     private boolean slow_mode               = false;
 
@@ -86,35 +86,31 @@ public class Manual extends RobotHardware {
             }
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
+            telemetry.addData("Forward Drive", forward_drive);
         }
     }
 
     private void robotControls() {
 
         //Drive Motor control
-        forward_drive = !controller.left_stick_buttonOnce();
+        if (controller.leftStickButtonOnce()) {
+            forward_drive = !forward_drive;
+        }
 
         // Slow mode controls
-        if (controller.dpadLeftOnce())
-        {
+        if (controller.rightStickButtonOnce()) {
             slow_mode = !slow_mode;
         }
-        double fast_scale = 1.0;
-        if (slow_mode)
-        {
-            fast_scale = 0.1;
-        }
-
 
         double sign, exponential, max_rate;
         sign = forward_drive ? 1 : -1;
-        //max_rate = slow_mode ? 1 : 0.5;
+        max_rate = slow_mode ? 0.3 : 1;
         exponential = exponential_input ? 3 : 1;
         setDriveForSimpleMecanum(
-                sign * fast_scale * Math.pow(gamepad1.left_stick_x, exponential),
-                sign *fast_scale * Math.pow(gamepad1.left_stick_y,exponential),
-                Math.pow(gamepad1.right_stick_x,exponential),
-                Math.pow(gamepad1.right_stick_y,exponential));
+                sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
+                sign * max_rate * Math.pow(gamepad1.left_stick_y, exponential),
+                max_rate * Math.pow(gamepad1.right_stick_x, exponential),
+                max_rate * Math.pow(gamepad1.right_stick_y, exponential));
 
 
         // Arm controls
@@ -125,18 +121,18 @@ public class Manual extends RobotHardware {
             double right_trigger = gamepad1.right_trigger; // Arm Up
 
             if (left_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, -(0.05 + 0.45*left_trigger));
+                setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45*left_trigger));
             } else if (right_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, (0.05 + 0.45*right_trigger));
+                setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45*right_trigger));
             } else {
                 setPower(MotorName.ARM_MOTOR, 0);
             }
         } else {
             // Arm Control Buttons
             if (gamepad1.dpad_up) {
-                setPower(MotorName.ARM_MOTOR, Constants.RAISE_ARM_SPEED);
+                setPower(MotorName.ARM_MOTOR, sign * Constants.RAISE_ARM_SPEED);
             } else if (gamepad1.dpad_down) {
-                setPower(MotorName.ARM_MOTOR, Constants.LOWER_ARM_SPEED);
+                setPower(MotorName.ARM_MOTOR, sign * Constants.LOWER_ARM_SPEED);
             } else {
                 setPower(MotorName.ARM_MOTOR, 0.0);
             }
