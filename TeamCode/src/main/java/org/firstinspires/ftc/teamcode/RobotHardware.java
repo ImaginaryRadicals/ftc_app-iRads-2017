@@ -35,8 +35,9 @@ public abstract class RobotHardware extends OpMode {
     // All color sensors on the robot, in order of ColorSensorName.
     private ArrayList<ColorSensor> allColorSensors;
 
-    // Per robot tuning parameters.
-    // private String vuforiaLicenseKey;
+    // Names of only the drive motors.
+    private ArrayList<MotorName> driveMotorNames;
+
 
     // Execution cycle period monitor.
     private ElapsedTime period  = new ElapsedTime();
@@ -100,18 +101,29 @@ public abstract class RobotHardware extends OpMode {
      * @param runMode
      */
     protected void setDriveMotorsRunMode(DcMotor.RunMode runMode) {
-        ArrayList<MotorName> driveMotorNames = new ArrayList<MotorName>();
-        driveMotorNames.add(MotorName.DRIVE_FRONT_LEFT);
-        driveMotorNames.add(MotorName.DRIVE_FRONT_RIGHT);
-        driveMotorNames.add(MotorName.DRIVE_BACK_LEFT);
-        driveMotorNames.add(MotorName.DRIVE_BACK_RIGHT);
-
         for (MotorName motor : driveMotorNames) {
             DcMotor m = allMotors.get(motor.ordinal());
             if (m == null) {
                 telemetry.addData("Motor Missing", motor.name());
             } else {
                 m.setMode(runMode);
+            }
+        }
+    }
+
+    /**
+     * Set zero power braking behavior for all drive wheels.
+     * @param zeroPowerBraking boolean to activate or deactivate zero power braking
+     */
+    protected void setDriveMotorsZeroPowerBraking(boolean zeroPowerBraking) {
+        DcMotor.ZeroPowerBehavior brakingMode = zeroPowerBraking ? DcMotor.ZeroPowerBehavior.BRAKE
+                : DcMotor.ZeroPowerBehavior.FLOAT;
+        for (MotorName motor : driveMotorNames) {
+            DcMotor m = allMotors.get(motor.ordinal());
+            if (m == null) {
+                telemetry.addData("Motor Missing", motor.name());
+            } else {
+                m.setZeroPowerBehavior(brakingMode);
             }
         }
     }
@@ -380,6 +392,14 @@ public abstract class RobotHardware extends OpMode {
                 allMotors.add(null);
             }
         }
+
+        // Collect a list of only the drive motors.
+        driveMotorNames = new ArrayList<MotorName>();
+            driveMotorNames.add(MotorName.DRIVE_FRONT_LEFT);
+            driveMotorNames.add(MotorName.DRIVE_FRONT_RIGHT);
+            driveMotorNames.add(MotorName.DRIVE_BACK_LEFT);
+            driveMotorNames.add(MotorName.DRIVE_BACK_RIGHT);
+
         // Set motor directions.
         try {
             allMotors.get(MotorName.DRIVE_FRONT_LEFT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
@@ -391,6 +411,9 @@ public abstract class RobotHardware extends OpMode {
 
         // Set drive motors to use encoders
         setDriveMotorsRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        
+        // Set drive motors to float instead of brake when power is zero.
+        setDriveMotorsZeroPowerBraking(false);
 
         // Set arm motor to brake
         try {
