@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 public class Manual extends RobotHardware {
     private Controller controller = null;
     private MecanumNavigation mecanumNavigation;
+    private double averagePeriodSeconds = 0;
     private boolean use_telemetry           = true;
     private boolean forward_drive           = true;
     private boolean exponential_input       = true;
@@ -43,6 +44,8 @@ public class Manual extends RobotHardware {
     public void loop() {
         // Keep controller rising edge trigger updated.
         controller.update();
+        // Average length of an execution period
+        averagePeriodSeconds = periodSec();
         // Update mecanum encoder navigation
         mecanumNavigation.update(new MecanumNavigation.WheelTicks(
                         getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
@@ -87,6 +90,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
+            telemetry.addData("Period Average (sec)", averagePeriodSeconds);
         }
     }
 
