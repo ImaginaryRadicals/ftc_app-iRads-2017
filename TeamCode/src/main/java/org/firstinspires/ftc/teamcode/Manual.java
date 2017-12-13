@@ -86,7 +86,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
-            telemetry.addData("Period Average (sec)", averagePeriodSeconds);
+            telemetry.addData("Period Average (sec)", df_prec.format(averagePeriodSeconds));
         }
     }
 

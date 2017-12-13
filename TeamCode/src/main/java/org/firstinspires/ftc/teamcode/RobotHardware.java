@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
 import org.firstinspires.ftc.teamcode.Utilities.VectorMath;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -461,6 +462,9 @@ public abstract class RobotHardware extends OpMode {
             }
         }
 
+        df = new DecimalFormat("0.00");
+        df_prec = new DecimalFormat("0.0000");
+
         storeClaw();
     }
 
@@ -483,6 +487,9 @@ public abstract class RobotHardware extends OpMode {
         }
     }
 
+    // Format for displaying decimals.
+    public DecimalFormat df;
+    public DecimalFormat df_prec;
 
 }
 

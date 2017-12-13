@@ -47,9 +47,9 @@ public class MecanumNavigation {
     }
 
     public void displayPosition() {
-        opMode.telemetry.addData("X: ", currentPosition.x);
-        opMode.telemetry.addData("Y: ", currentPosition.y);
-        opMode.telemetry.addData("Theta: ", currentPosition.theta * 180 / Math.PI);
+        opMode.telemetry.addData("X: ", opMode.df.format(currentPosition.x));
+        opMode.telemetry.addData("Y: ", opMode.df.format(currentPosition.y));
+        opMode.telemetry.addData("Theta: ", opMode.df.format(currentPosition.theta * 180 / Math.PI));
     }
 
     public Navigation2D deltaPositionFromDeltaWheelTicks(WheelTicks deltaWheelTicks) {
