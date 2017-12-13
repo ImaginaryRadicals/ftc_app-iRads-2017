@@ -13,6 +13,7 @@ public class Controller {
     private int dpad_up, dpad_down, dpad_left, dpad_right;
     private int x, y, a, b;
     private int left_bumper, right_bumper;
+    private int right_stick_button, left_stick_button;
 
     public double left_stick_x, right_stick_x, left_stick_y, right_stick_y;
     public double left_trigger, right_trigger;
@@ -22,6 +23,16 @@ public class Controller {
     }
 
     public void update() {
+        if (gamepad.right_stick_button) {
+            ++right_stick_button;
+        } else {
+            right_stick_button = 0;
+        }
+        if (gamepad.left_stick_button) {
+            ++left_stick_button;
+        } else {
+            left_stick_button = 0;
+        }
         if (gamepad.x) {
             ++x;
         } else {
@@ -80,6 +91,10 @@ public class Controller {
         left_trigger = gamepad.left_trigger;
         right_trigger = gamepad.right_trigger;
     }
+
+    public boolean right_stick_button() {return  0 < right_stick_button; }
+
+    public boolean left_stick_button() {return  0 < left_stick_button; }
 
     public boolean dpadUp() {
         return 0 < dpad_up;
