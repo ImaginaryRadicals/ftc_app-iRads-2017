@@ -91,8 +91,8 @@ public class Manual extends RobotHardware {
     private void robotControls() {
 
         //Drive Motor control
-        forward_drive = !controller.right_stick_button();
-        slow_mode = !controller.left_stick_button();
+        forward_drive = !controller.right_stick_buttonOnce();
+        slow_mode = !controller.left_stick_buttonOnce();
         double sign, exponential, max_rate;
         sign = forward_drive ? 1 : -1;
         max_rate = slow_mode ? 0.5 : 1;
