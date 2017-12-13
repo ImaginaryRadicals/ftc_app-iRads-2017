@@ -84,6 +84,40 @@ public abstract class RobotHardware extends OpMode {
     }
 
     /**
+     * Stops all motors.
+     */
+    protected void stopAllMotors() {
+        for (MotorName m : MotorName.values()) {
+            setPower(m, 0);
+        }
+    }
+
+    /**
+     * Set all four drive motors to the same runMode.
+     * Options are RUN_WITHOUT_ENCODER, RUN_USING_ENCODER,
+     * RUN_TO_POSITION is used with setTargetPosition()
+     * STOP_AND_RESET_ENCODER
+     * @param runMode
+     */
+    protected void setDriveMotorsRunMode(DcMotor.RunMode runMode) {
+        ArrayList<MotorName> driveMotorNames = new ArrayList<MotorName>();
+        driveMotorNames.add(MotorName.DRIVE_FRONT_LEFT);
+        driveMotorNames.add(MotorName.DRIVE_FRONT_RIGHT);
+        driveMotorNames.add(MotorName.DRIVE_BACK_LEFT);
+        driveMotorNames.add(MotorName.DRIVE_BACK_RIGHT);
+
+        for (MotorName motor : driveMotorNames) {
+            DcMotor m = allMotors.get(motor.ordinal());
+            if (m == null) {
+                telemetry.addData("Motor Missing", motor.name());
+            } else {
+                m.setMode(runMode);
+            }
+        }
+    }
+
+
+    /**
      * Sets the drive chain power.
      * @param left The power for the left two motors.
      * @param right The power for the right two motors.
@@ -352,8 +386,11 @@ public abstract class RobotHardware extends OpMode {
             allMotors.get(MotorName.DRIVE_BACK_LEFT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
             allMotors.get(MotorName.ARM_MOTOR.ordinal()).setDirection(DcMotor.Direction.FORWARD);
         } catch (Exception e) {
-            telemetry.addData("Unable to set right motor direction","");
+            telemetry.addData("Unable to set motor direction","");
         }
+
+        // Set drive motors to use encoders
+        setDriveMotorsRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set arm motor to brake
         try {
