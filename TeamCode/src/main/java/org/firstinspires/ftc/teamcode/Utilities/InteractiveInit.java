@@ -74,14 +74,9 @@ public class InteractiveInit {
 
     Telemetry telemetry;
     Gamepad gamepad1;
-    LinearOpMode opMode;
+    private Controller controller;
+    RobotHardware opMode;
     private boolean interactiveMode = true;
-
-    private Signal sigDpadUp = new Signal();
-    private Signal sigDpadDown = new Signal();
-    private Signal sigDpadRight = new Signal();
-    private Signal sigDpadLeft = new Signal();
-    private Signal sigButtonA = new Signal();
 
     private ArrayList<VarOption<Double>> double_options = new ArrayList<>();
     private ArrayList<VarOption<String>> string_options = new ArrayList<>();
@@ -141,10 +136,11 @@ public class InteractiveInit {
         }
     }
 
-    public InteractiveInit(Telemetry telemetry, Gamepad gamepad1, LinearOpMode opMode)
+    public InteractiveInit(RobotHardware opMode)
     {
-        this.telemetry = telemetry;
-        this.gamepad1 = gamepad1;
+        this.telemetry = opMode.telemetry;
+        this.gamepad1 = opMode.gamepad1;
+        this.controller = new Controller(gamepad1);
         this.opMode = opMode;
     }
 
@@ -230,20 +226,21 @@ public class InteractiveInit {
     private void updateInputs() {
         // Inputs are updated using the gamepad controls.
         // Loop exits if gamepad not detected or opMode started.
-        if(gamepad1 != null && !opMode.opModeIsActive()) {
-            if (sigDpadDown.risingEdge(gamepad1.dpad_down)) {
+        controller.update();
+        if(gamepad1 != null) {
+            if (controller.dpadDownOnce()) {
                 ++cursor_location;
                 if (cursor_location >= numOptions())
                     cursor_location = numOptions() - 1;
-            } else if (sigDpadUp.risingEdge(gamepad1.dpad_up)) {
+            } else if (controller.dpadUpOnce()) {
                 --cursor_location;
                 if (cursor_location < 0)
                     cursor_location = 0;
-            } else if (sigDpadRight.risingEdge(gamepad1.dpad_right)) {
+            } else if (controller.dpadRightOnce()) {
                 nextOption();
-            } else if (sigDpadLeft.risingEdge(gamepad1.dpad_left)) {
+            } else if (controller.dpadLeftOnce()) {
                 prevOption();
-            } else if (sigButtonA.risingEdge(gamepad1.a)) {
+            } else if (controller.AOnce()) {
                 interactiveMode = false;
             }
         }
