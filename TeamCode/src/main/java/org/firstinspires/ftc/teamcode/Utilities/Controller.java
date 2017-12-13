@@ -11,7 +11,7 @@ public class Controller {
     private Gamepad gamepad;
 
     private int dpad_up, dpad_down, dpad_left, dpad_right;
-    private int x, y, a, b;
+    private int x, y, a, b, start;
     private int left_bumper, right_bumper;
     private int right_stick_button, left_stick_button;
 
@@ -52,6 +52,11 @@ public class Controller {
             ++b;
         } else {
             b = 0;
+        }
+        if (gamepad.start) {
+            ++start;
+        } else {
+            start = 0;
         }
         if (gamepad.dpad_up) {
             ++dpad_up;
@@ -132,6 +137,10 @@ public class Controller {
         return 0 < b;
     }
 
+    public boolean start() {
+        return 0 < start;
+    }
+
     public boolean leftBumper() {
         return 0 < left_bumper;
     }
@@ -178,6 +187,10 @@ public class Controller {
 
     public boolean BOnce() {
         return 1 == b;
+    }
+
+    public boolean startOnce() {
+        return 1 == start;
     }
 
     public boolean leftBumperOnce() {
