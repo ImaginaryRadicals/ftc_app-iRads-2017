@@ -152,6 +152,10 @@ public class Controller {
         return 1 == dpad_right;
     }
 
+    public boolean right_stick_buttonOnce() { return 1 == right_stick_button; }
+
+    public boolean left_stick_buttonOnce() { return 1 == left_stick_button; }
+
     public boolean XOnce() {
         return 1 == x;
     }
