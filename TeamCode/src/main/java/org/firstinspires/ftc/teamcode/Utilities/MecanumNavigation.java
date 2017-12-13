@@ -12,9 +12,7 @@ public class MecanumNavigation {
     public DriveTrainMecanum driveTrainMecanum;
     public Navigation2D currentPosition;
     public Navigation2D previousPosition;
-    public WheelTicks currentWheelTicks;
-    public WheelTicks previousWheelTicks;
-
+    public WheelTicks wheelTicks;
 
 
     public MecanumNavigation(OpMode opMode, DriveTrainMecanum driveTrainMecanum) {
@@ -24,8 +22,7 @@ public class MecanumNavigation {
 
     public void initialize(Navigation2D initialNavPosition, WheelTicks initialWheelTicks) {
         currentPosition = initialNavPosition;
-        currentWheelTicks = initialWheelTicks;
-        previousWheelTicks = initialWheelTicks;
+        wheelTicks = initialWheelTicks;
     }
 
     public void setCurrentPosition(Navigation2D currentPosition) {
@@ -33,9 +30,8 @@ public class MecanumNavigation {
     }
 
     public void update(WheelTicks newWheelTicks) {
-        WheelTicks deltaWheelTicks = newWheelTicks.getDeltaFromPrevious(previousWheelTicks);
-        this.previousWheelTicks = this.currentWheelTicks;
-        this.currentWheelTicks = newWheelTicks;
+        WheelTicks deltaWheelTicks = newWheelTicks.getDeltaFromPrevious(wheelTicks);
+        this.wheelTicks = (WheelTicks)newWheelTicks.clone();
 
         Navigation2D deltaPosition = deltaPositionFromDeltaWheelTicks(deltaWheelTicks);
         this.previousPosition = this.currentPosition;
@@ -57,12 +53,14 @@ public class MecanumNavigation {
         double backLeftRadians = driveTrainMecanum.ticksToRadians(deltaWheelTicks.backLeft);
         double backRightRadians = driveTrainMecanum.ticksToRadians(deltaWheelTicks.backRight);
 
+        double R_4 = wheelRadius / 4;
+
         double deltaX = (frontLeftRadians + frontRightRadians + backLeftRadians + backRightRadians)
-                * wheelRadius / 4;
+                * R_4;
         double deltaY = (-frontLeftRadians + frontRightRadians + backLeftRadians - backRightRadians)
-                * wheelRadius / 4;
+                * R_4;
         double deltaTheta = (-frontLeftRadians + frontRightRadians - backLeftRadians + backRightRadians)
-                * wheelRadius / (4 * wheelbaseK);
+                * R_4 / wheelbaseK;
 
         return new Navigation2D(deltaX,deltaY,deltaTheta);
     }
@@ -158,7 +156,8 @@ public class MecanumNavigation {
     /**
      * Track encoder values of each Mecanum wheel.
      */
-    public static class WheelTicks{
+    public static class WheelTicks implements Cloneable
+    {
         public int frontLeft;
         public int frontRight;
         public int backLeft;
@@ -177,7 +176,16 @@ public class MecanumNavigation {
                                 this.backLeft - previous.backLeft,
                                 this.backRight - previous.backRight);
         }
+
+        @Override
+        public Object clone()
+        {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
-
-
 }
