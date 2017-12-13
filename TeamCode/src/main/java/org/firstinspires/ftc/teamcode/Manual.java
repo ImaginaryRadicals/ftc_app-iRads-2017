@@ -46,13 +46,9 @@ public class Manual extends RobotHardware {
         controller.update();
         // Average length of an execution period
         averagePeriodSeconds = periodSec();
-        // Update mecanum encoder navigation
-        mecanumNavigation.update(new MecanumNavigation.WheelTicks(
-                        getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
-                        getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
-                        getEncoderValue(MotorName.DRIVE_BACK_LEFT),
-                        getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
-              mecanumNavigation.displayPosition();
+        // Update mecanum encoder navigation via opMode context.
+        mecanumNavigation.update();
+        mecanumNavigation.displayPosition();
 
 
         // Chord Commands

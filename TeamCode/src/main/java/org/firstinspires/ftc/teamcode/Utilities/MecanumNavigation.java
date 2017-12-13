@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 /**
  * Created by Ashley on 12/8/2017.
@@ -8,14 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 public class MecanumNavigation {
 
-    private OpMode opMode;
+    private RobotHardware opMode;
     public DriveTrainMecanum driveTrainMecanum;
     public Navigation2D currentPosition;
     public Navigation2D previousPosition;
     public WheelTicks wheelTicks;
 
 
-    public MecanumNavigation(OpMode opMode, DriveTrainMecanum driveTrainMecanum) {
+    public MecanumNavigation(RobotHardware opMode, DriveTrainMecanum driveTrainMecanum) {
         this.opMode = opMode;
         this.driveTrainMecanum = driveTrainMecanum;
     }
@@ -34,8 +34,16 @@ public class MecanumNavigation {
         this.wheelTicks = (WheelTicks)newWheelTicks.clone();
 
         Navigation2D deltaPosition = deltaPositionFromDeltaWheelTicks(deltaWheelTicks);
-        this.previousPosition = this.currentPosition;
+        this.previousPosition = (Navigation2D)currentPosition.clone();
         this.currentPosition.addRelativeDeltaToAbsolute(deltaPosition);
+    }
+
+    public void update() {
+        update(new MecanumNavigation.WheelTicks(
+                opMode.getEncoderValue(RobotHardware.MotorName.DRIVE_FRONT_LEFT),
+                opMode.getEncoderValue(RobotHardware.MotorName.DRIVE_FRONT_RIGHT),
+                opMode.getEncoderValue(RobotHardware.MotorName.DRIVE_BACK_LEFT),
+                opMode.getEncoderValue(RobotHardware.MotorName.DRIVE_BACK_RIGHT)));
     }
 
     public void displayPosition() {
@@ -70,7 +78,7 @@ public class MecanumNavigation {
     /**
      * 2d position plus angular orientation.
      */
-    public static class Navigation2D{
+    public static class Navigation2D implements Cloneable{
         public double x = 0;
         public double y = 0;
         // Rotation degrees CCW
@@ -80,6 +88,11 @@ public class MecanumNavigation {
             this.x = x;
             this.y = y;
             this.theta = theta;
+        }
+
+        // Simple clone.
+        public Navigation2D(Navigation2D navigation2D) {
+            this(navigation2D.x, navigation2D.y, navigation2D.theta);
         }
 
         public void add (Navigation2D other) {
@@ -105,6 +118,14 @@ public class MecanumNavigation {
                                  this.theta - other.theta);
         }
 
+        /**
+         * When "this" Navigation2D instance refers to an absolute position,
+         * and the argument,
+         * @param deltaRelativeNav
+         * refers to a delta movement in the robot relative coordinate frame,
+         * this method transforms the relative movement into the absolute coordinate frame
+         * and adds it to the absolute position.
+         */
         public void addRelativeDeltaToAbsolute(Navigation2D deltaRelativeNav) {
             double PHASE_ROTATION = 0;
 
@@ -123,6 +144,17 @@ public class MecanumNavigation {
             this.x = absoluteX;
             this.y = absoluteY;
             this.theta = absoluteTheta;
+        }
+
+        @Override
+        public Object clone()
+        {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 
