@@ -350,7 +350,7 @@ public abstract class RobotHardware extends OpMode {
         try {
             allMotors.get(MotorName.DRIVE_FRONT_LEFT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
             allMotors.get(MotorName.DRIVE_BACK_LEFT.ordinal()).setDirection(DcMotor.Direction.REVERSE);
-            allMotors.get(MotorName.ARM_MOTOR.ordinal()).setDirection(DcMotor.Direction.REVERSE);
+            allMotors.get(MotorName.ARM_MOTOR.ordinal()).setDirection(DcMotor.Direction.FORWARD);
         } catch (Exception e) {
             telemetry.addData("Unable to set right motor direction","");
         }
