@@ -19,6 +19,8 @@ import java.util.List;
  *            gamepad1.right_stick_x, gamepad1.right_stick_y));
  *    // Set power on the motors.
  *    frontLeftMotor.setPower(wheels.frontLeft);
+ *
+ * Thanks to Phillip Tischler  http://pmtischler-ftc-app.readthedocs.io/en/latest/
  */
 public class Mecanum {
     /**
