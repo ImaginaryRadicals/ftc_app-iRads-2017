@@ -54,6 +54,8 @@ public class Manual extends RobotHardware {
         // Chord Commands
         if(controller.leftBumper()) {
 
+            stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
+
             // Reset navigation position to zero.
             if (controller.YOnce()) {
                 mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0, 0, 0));
