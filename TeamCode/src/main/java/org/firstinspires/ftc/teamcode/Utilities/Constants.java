@@ -25,7 +25,7 @@ public class Constants {
     public static final double RAISE_ARM_SPEED = 0.3;
     public static final double LOWER_ARM_SPEED = -0.3;
 
-    public static final double DRIVE_WHEEL_DIAMETER_INCHES  =  4/2;
+    public static final double DRIVE_WHEEL_DIAMETER_INCHES  =  4;
 
     public static final double MM_PER_IN = 25.4f;
     public static final double WHEELBASE_WIDTH_IN = 15.268;
