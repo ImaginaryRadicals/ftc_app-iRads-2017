@@ -143,6 +143,17 @@ public abstract class RobotHardware extends OpMode {
     }
 
     /**
+     * Apply motor power matching the wheels object
+     * @param wheels Provides all four mecanum wheel powers, [-1, 1]
+     */
+    protected void setDriveForMecanumWheels(Mecanum.Wheels wheels) {
+        setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
+        setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
+        setPower(MotorName.DRIVE_FRONT_RIGHT, wheels.frontRight);
+        setPower(MotorName.DRIVE_BACK_RIGHT, wheels.backRight);
+    }
+
+    /**
      * Sets mecanum drive chain power using simplistic calculations.
      * @param leftStickX Unmodified Gamepad leftStickX inputs.
      * @param leftStickY Unmodified Gamepad leftStickY inputs.
@@ -152,10 +163,7 @@ public abstract class RobotHardware extends OpMode {
     protected void setDriveForSimpleMecanum(double leftStickX, double leftStickY,
                                             double rightStickX, double rightStickY) {
         Mecanum.Wheels wheels = Mecanum.simpleJoystickToWheels (leftStickX, leftStickY, rightStickX, rightStickY);
-        setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
-        setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
-        setPower(MotorName.DRIVE_FRONT_RIGHT, wheels.frontRight);
-        setPower(MotorName.DRIVE_BACK_RIGHT, wheels.backRight);
+        setDriveForMecanumWheels(wheels);
     }
 
     /**
@@ -165,10 +173,7 @@ public abstract class RobotHardware extends OpMode {
      */
     protected void setDriveForMecanum(Mecanum.Motion motion) {
         Mecanum.Wheels wheels = Mecanum.motionToWheels(motion);
-        setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
-        setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
-        setPower(MotorName.DRIVE_FRONT_RIGHT, wheels.frontRight);
-        setPower(MotorName.DRIVE_BACK_RIGHT, wheels.backRight);
+        setDriveForMecanumWheels(wheels);
     }
 
     /**
@@ -179,10 +184,7 @@ public abstract class RobotHardware extends OpMode {
     protected void setDriveForMecanumForSpeed(Mecanum.Motion motion) {
         Mecanum.Wheels wheels = Mecanum.motionToWheels(motion).scaleWheelPower(
                 Math.sqrt(2));
-        setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
-        setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
-        setPower(MotorName.DRIVE_FRONT_RIGHT, wheels.frontRight);
-        setPower(MotorName.DRIVE_BACK_RIGHT, wheels.backRight);
+        setDriveForMecanumWheels(wheels);
     }
 
 
