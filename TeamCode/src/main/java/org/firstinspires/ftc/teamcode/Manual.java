@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 import org.firstinspires.ftc.teamcode.Utilities.Controller;
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
@@ -89,6 +90,9 @@ public class Manual extends RobotHardware {
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Period Average (sec)", df_prec.format(averagePeriodSeconds));
+            telemetry.addData("Color RED", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
+            telemetry.addData("Color BLUE", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
+            telemetry.addData("ODS_Right", df_prec.format(getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName.ODS_RIGHT)));
         }
     }
 
