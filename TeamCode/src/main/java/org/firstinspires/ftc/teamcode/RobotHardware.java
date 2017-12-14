@@ -342,6 +342,22 @@ public abstract class RobotHardware extends OpMode {
         }
     }
 
+    /**
+     * Checks JEWEL_COLOR sensor and returns enum based on color detected.
+     * @return RED, BLUE, or null
+     */
+    protected Color.Ftc getJewelColor() {
+        int red = getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED);
+        int blue = getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE);
+        if (red > blue) {
+            return Color.Ftc.RED;
+        } else if (blue > red) {
+            return Color.Ftc.BLUE;
+        } else {
+            return Color.Ftc.UNKNOWN;
+        }
+    }
+
 
     // Possible starting positions.
     protected enum StartPosition {

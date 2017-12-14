@@ -92,6 +92,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Period Average (sec)", df_prec.format(averagePeriodSeconds));
             telemetry.addData("Color RED", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
             telemetry.addData("Color BLUE", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
+            telemetry.addData("Jewel Color:", getJewelColor().toString());
             telemetry.addData("ODS_Right", df_prec.format(getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName.ODS_RIGHT)));
         }
     }

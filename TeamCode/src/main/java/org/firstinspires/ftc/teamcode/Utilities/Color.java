@@ -8,6 +8,7 @@ public class Color {
     public enum Ftc {
         RED,
         BLUE,
+        UNKNOWN,
     }
 
     // Color channels.
