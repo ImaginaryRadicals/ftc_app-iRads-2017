@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
@@ -17,19 +19,25 @@ import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 @TeleOp (name="Manual Mecanum", group="Manual")
 //@Disabled
 public class Manual extends RobotHardware {
-    private Controller controller = null;
+
+    public Controller controller = null;
     public MecanumNavigation mecanumNavigation;
+    ElapsedTime loopTimer = new ElapsedTime();
     public double averagePeriodSeconds = 0;
+    private double lastPeriodSeconds = 0;
     private boolean use_telemetry           = true;
     private boolean forward_drive           = true;
     private boolean exponential_input       = true;
     private boolean analog_arm_control      = false;
     private boolean slow_mode               = false;
 
+    private double jewelServoTargetPosition = Constants.JEWEL_ARM_INTIAL;
+
     @Override
     public void init() {
         super.init();
         controller = new Controller(gamepad1);
+        loopTimer.reset();
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
@@ -49,6 +57,9 @@ public class Manual extends RobotHardware {
         averagePeriodSeconds = periodSec();
         // Update mecanum encoder navigation via opMode context.
         mecanumNavigation.update();
+        // Time period of previous loop iteration.
+        lastPeriodSeconds = loopTimer.seconds();
+        loopTimer.reset();
 
 
         // Chord Commands
@@ -62,17 +73,19 @@ public class Manual extends RobotHardware {
             }
             // Toggle analog arm control.
             if (controller.XOnce()) {
-                analog_arm_control = ! analog_arm_control;
+                analog_arm_control = !analog_arm_control;
             }
             // Toggle exponential input
             if (controller.BOnce()) {
-                exponential_input = ! exponential_input;
+                exponential_input = !exponential_input;
             }
             // Cage claw
             if (controller.AOnce()) {
                 storeClaw();
             }
-
+        } else if (controller.rightBumper()) {
+            stopAllMotors();
+            jewelArmTesting();
         } else {
             // Non-chord robot inputs
             robotControls();
@@ -85,6 +98,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+            telemetry.addData("Jewel Target Position", df.format(jewelServoTargetPosition));
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -151,6 +165,13 @@ public class Manual extends RobotHardware {
         }
 
 
+    }
+
+    private void jewelArmTesting() {
+        double servoRate = 1;
+        double stepSize = servoRate * lastPeriodSeconds * -controller.right_stick_y;
+        jewelServoTargetPosition = Range.clip(stepSize + jewelServoTargetPosition, 0, 1);
+        setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
     }
 
 
