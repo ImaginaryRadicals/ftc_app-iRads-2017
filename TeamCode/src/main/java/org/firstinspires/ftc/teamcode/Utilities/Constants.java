@@ -19,6 +19,10 @@ public class Constants {
     public static final double INITIAL_LEFT_CLAW_POS = 1.0;
     public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
 
+    public static final double JEWEL_ARM_INTIAL = 1.0;
+    public static final double JEWEL_ARM_BOTTOM = 0.0;
+    public static final double JEWEL_ARM_TOP = 1.0;
+
     public static final int RAISE_ARM_POSITION = 100;
     public static final int LOWER_ARM_POSITION = 50;
 

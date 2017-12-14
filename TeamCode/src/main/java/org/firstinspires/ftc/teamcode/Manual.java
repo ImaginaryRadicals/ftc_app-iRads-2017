@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 //@Disabled
 public class Manual extends RobotHardware {
     private Controller controller = null;
-    private MecanumNavigation mecanumNavigation;
-    private double averagePeriodSeconds = 0;
+    public MecanumNavigation mecanumNavigation;
+    public double averagePeriodSeconds = 0;
     private boolean use_telemetry           = true;
     private boolean forward_drive           = true;
     private boolean exponential_input       = true;
@@ -49,7 +49,6 @@ public class Manual extends RobotHardware {
         averagePeriodSeconds = periodSec();
         // Update mecanum encoder navigation via opMode context.
         mecanumNavigation.update();
-        mecanumNavigation.displayPosition();
 
 
         // Chord Commands
@@ -82,18 +81,13 @@ public class Manual extends RobotHardware {
 
         if (use_telemetry)
         {
-            //telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
-            for (MotorName m : MotorName.values()) {
-                telemetry.addData(m.name(), getEncoderValue(m));
-            }
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
-            telemetry.addData("Period Average (sec)", df_prec.format(averagePeriodSeconds));
-            telemetry.addData("Color RED", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
-            telemetry.addData("Color BLUE", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
-            telemetry.addData("Jewel Color:", getJewelColor().toString());
-            telemetry.addData("ODS_Right", df_prec.format(getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName.ODS_RIGHT)));
+            telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+            telemetry.addLine(); // Visual Space
+            mecanumNavigation.displayPosition();
+            telemetry.addLine(); // Visual Space
         }
     }
 

@@ -194,12 +194,24 @@ public abstract class RobotHardware extends OpMode {
         setTargetPosition(MotorName.ARM_MOTOR, Constants.LOWER_ARM_POSITION);
     }
 
+    //Same thing as the Servo one, but for a motor
+    protected void setTargetPosition(MotorName motor, int position) {
+        DcMotor s = allMotors.get(motor.ordinal());
+        if (s == null) {
+            telemetry.addData("Motor Missing", motor.name());
+        } else {
+            s.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            s.setPower(1.0);
+            s.setTargetPosition(position);
+        }
+    }
 
 
     // The servos on the robot.
     protected enum ServoName {
         CLAW_LEFT,
         CLAW_RIGHT,
+        JEWEL_ARM,
     }
 
     // Servo methods
@@ -218,14 +230,18 @@ public abstract class RobotHardware extends OpMode {
         }
     }
 
-    //Same thing as the Servo one, but for a motor
-    protected void setTargetPosition(MotorName motor, int position) {
-        DcMotor s = allMotors.get(motor.ordinal());
+    /**
+     * Get the position of a servo.
+     * @param servo ServoName enum to check
+     * @return double servo position [0,1]
+     */
+    protected double getAngle(ServoName servo) {
+        Servo s = allServos.get(servo.ordinal());
         if (s == null) {
-            telemetry.addData("Motor Missing", motor.name());
+            telemetry.addData("Servo Missing", servo.name());
+            return -1;
         } else {
-            s.setPower(1.0);
-            s.setTargetPosition(position);
+            return s.getPosition();
         }
     }
 
@@ -258,6 +274,10 @@ public abstract class RobotHardware extends OpMode {
     protected void setPositionClaw(double position) {
         setAngle(ServoName.CLAW_LEFT, position);
         setAngle(ServoName.CLAW_RIGHT, position);
+    }
+
+    protected void setPositionJewelArm(double position) {
+        setAngle(ServoName.JEWEL_ARM, position);
     }
 
 
