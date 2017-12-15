@@ -38,7 +38,7 @@ public class Manual extends RobotHardware {
     }
 
 
-    private double jewelServoTargetPosition = Constants.JEWEL_ARM_INTIAL;
+    private double jewelServoTargetPosition = Constants.JEWEL_ARM_INITIAL;
 
     @Override
     public void init() {

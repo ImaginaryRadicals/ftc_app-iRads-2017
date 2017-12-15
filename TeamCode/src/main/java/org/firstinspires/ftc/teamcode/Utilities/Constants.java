@@ -19,7 +19,7 @@ public class Constants {
     public static final double INITIAL_LEFT_CLAW_POS = 1.0;
     public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
 
-    public static final double JEWEL_ARM_INTIAL = 0.97;
+    public static final double JEWEL_ARM_INITIAL = 0.97;
     public static final double JEWEL_ARM_BOTTOM = 0.05;
     public static final double JEWEL_ARM_TOP = 0.81;
 
