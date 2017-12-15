@@ -471,8 +471,9 @@ public abstract class RobotHardware extends OpMode {
         // Set arm motor to brake
         try {
             allMotors.get(MotorName.ARM_MOTOR.ordinal()).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            allMotors.get(MotorName.ARM_MOTOR.ordinal()).setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } catch (Exception e){
-            telemetry.addData("Unable to set arm motor to zero power brake", "");
+            telemetry.addData("Unable to set arm motor to zero power brake or encoder use", "");
         }
 
         allServos = new ArrayList<Servo>();
