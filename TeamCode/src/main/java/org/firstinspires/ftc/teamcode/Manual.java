@@ -25,11 +25,18 @@ public class Manual extends RobotHardware {
     ElapsedTime loopTimer = new ElapsedTime();
     public double averagePeriodSeconds = 0;
     private double lastPeriodSeconds = 0;
-    private boolean use_telemetry           = true;
-    private boolean forward_drive           = true;
-    private boolean exponential_input       = true;
-    private boolean analog_arm_control      = false;
-    private boolean slow_mode               = false;
+    private boolean use_telemetry = true;
+    private boolean forward_drive = true;
+    private boolean exponential_input = true;
+    private boolean analog_arm_control = false;
+    private boolean slow_mode = false;
+    private ClawState clawState = ClawState.CLAW_STOWED;
+
+    // Variables for the claw states.
+    private enum ClawState {
+        CLAW_STOWED, CLAW_OPEN, CLAW_RELEASE, CLAW_CLOSED
+    }
+
 
     private double jewelServoTargetPosition = Constants.JEWEL_ARM_INTIAL;
 
@@ -43,7 +50,7 @@ public class Manual extends RobotHardware {
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
                         Constants.DRIVE_WHEEL_DIAMETER_INCHES, Constants.DRIVE_WHEEL_STEPS_PER_ROT));
-        mecanumNavigation.initialize(new MecanumNavigation.Navigation2D(0,0,0),
+        mecanumNavigation.initialize(new MecanumNavigation.Navigation2D(0, 0, 0),
                 new MecanumNavigation.WheelTicks(getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
                         getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
                         getEncoderValue(MotorName.DRIVE_BACK_LEFT),
@@ -64,7 +71,7 @@ public class Manual extends RobotHardware {
 
 
         // Chord Commands
-        if(controller.leftBumper()) {
+        if (controller.leftBumper()) {
 
             stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
 
@@ -93,8 +100,7 @@ public class Manual extends RobotHardware {
         }
 
 
-        if (use_telemetry)
-        {
+        if (use_telemetry) {
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Forward Drive", forward_drive);
@@ -130,16 +136,15 @@ public class Manual extends RobotHardware {
 
 
         // Arm controls
-        if (analog_arm_control)
-        {
+        if (analog_arm_control) {
             // Arm Control Analog
             double left_trigger = gamepad1.left_trigger; // Arm Dowm
             double right_trigger = gamepad1.right_trigger; // Arm Up
 
             if (left_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45*left_trigger));
+                setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45 * left_trigger));
             } else if (right_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45*right_trigger));
+                setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45 * right_trigger));
             } else {
                 setPower(MotorName.ARM_MOTOR, 0);
             }
@@ -176,4 +181,34 @@ public class Manual extends RobotHardware {
     }
 
 
+    // Claw Control
+    // Right closes and Left Opens
+    private void clawControls() {
+        if (clawState == ClawState.CLAW_STOWED) {
+            storeClaw();
+            if (controller.rightBumperOnce()) {
+                clawState = ClawState.CLAW_OPEN;
+            }
+        } else if (clawState == ClawState.CLAW_OPEN) {
+            openClaw();
+            if (controller.rightBumperOnce()) {
+                clawState = ClawState.CLAW_CLOSED;
+            } else if (controller.leftBumperOnce()) {
+                clawState = ClawState.CLAW_STOWED;
+            }
+        } else if (clawState == ClawState.CLAW_CLOSED) {
+            closeClaw();
+            if (controller.leftBumperOnce()) {
+                clawState = ClawState.CLAW_RELEASE;
+            }
+        } else if (clawState == ClawState.CLAW_RELEASE) {
+            slightOpenClaw();
+            if (controller.rightBumperOnce()) {
+                clawState = ClawState.CLAW_CLOSED;
+            } else if (controller.leftBumperOnce()) {
+                clawState = ClawState.CLAW_OPEN;
+            }
+
+        }
+    }
 }
