@@ -247,6 +247,12 @@ public abstract class RobotHardware extends OpMode {
         }
     }
 
+    // Sets the Jewel are servo to the init position
+
+    protected void armServoStored() {
+        setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_INTIAL);
+    }
+
 
     // Opens the servo claw
     protected void openClaw() {

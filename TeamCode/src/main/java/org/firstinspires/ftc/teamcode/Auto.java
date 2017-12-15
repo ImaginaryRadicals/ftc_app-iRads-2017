@@ -65,6 +65,7 @@ public class Auto extends RobotHardware {
     @Override
     public void init() {
         super.init();
+        armServoStored();
 
     }
 
