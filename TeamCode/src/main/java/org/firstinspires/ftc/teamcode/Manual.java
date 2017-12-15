@@ -36,6 +36,7 @@ public class Manual extends RobotHardware {
     @Override
     public void init() {
         super.init();
+        armServoStored();
         controller = new Controller(gamepad1);
         loopTimer.reset();
         mecanumNavigation = new MecanumNavigation(this,
