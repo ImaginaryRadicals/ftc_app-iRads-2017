@@ -28,7 +28,7 @@ public class Manual extends RobotHardware {
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
     private boolean exponential_input = true;
-    private boolean analog_arm_control = false;
+    private boolean analog_arm_control = true;
     private boolean slow_mode = false;
     private ClawState clawState = ClawState.CLAW_STOWED;
 
@@ -71,9 +71,10 @@ public class Manual extends RobotHardware {
 
 
         // Chord Commands
-        if (controller.leftBumper()) {
+        if (controller.leftBumper()&&controller.rightBumper()) {
 
             stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
+            jewelArmTesting();
 
             // Reset navigation position to zero.
             if (controller.YOnce()) {
@@ -91,9 +92,6 @@ public class Manual extends RobotHardware {
             if (controller.AOnce()) {
                 storeClaw();
             }
-        } else if (controller.rightBumper()) {
-            stopAllMotors();
-            jewelArmTesting();
         } else {
             // Non-chord robot inputs
             robotControls();
@@ -159,17 +157,7 @@ public class Manual extends RobotHardware {
             }
         }
 
-        //Claw Control
-        if (gamepad1.x) {
-            openClaw();
-        } else if (gamepad1.y) {
-            closeClaw();
-        } else if (gamepad1.b) {
-            slightOpenClaw();
-        } else if (gamepad1.a && !analog_arm_control) {
-            setPositionClaw(gamepad1.right_trigger);
-        }
-
+        clawStateMachine();
 
     }
 
@@ -183,7 +171,7 @@ public class Manual extends RobotHardware {
 
     // Claw Control
     // Right closes and Left Opens
-    private void clawControls() {
+    private void clawStateMachine() {
         if (clawState == ClawState.CLAW_STOWED) {
             storeClaw();
             if (controller.rightBumperOnce()) {
