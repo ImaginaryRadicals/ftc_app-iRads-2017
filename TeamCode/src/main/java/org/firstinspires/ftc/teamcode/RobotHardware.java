@@ -253,6 +253,14 @@ public abstract class RobotHardware extends OpMode {
         setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_INTIAL);
     }
 
+    protected  void armServoTop() {
+        setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_TOP);
+    }
+
+    protected  void armServoBottom() {
+        setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM);
+    }
+
 
     // Opens the servo claw
     protected void openClaw() {
