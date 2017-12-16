@@ -60,6 +60,13 @@ public class AutoSimpleJewelStateMachine {
 
         if (state == JewelState.STATE_LOWER_ARM) {
             opMode.armServoBottom();
+            opMode.closeClaw();
+
+            if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < 500) {
+                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
+            } else {
+                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+            }
             
             if(stateTimer.seconds() > 4) {
                 state = JewelState.STATE_DETECT_COLOR;
