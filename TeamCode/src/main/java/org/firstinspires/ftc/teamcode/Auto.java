@@ -67,7 +67,7 @@ public class Auto extends RobotHardware {
     @Override
     public void init() {
         super.init();
-        this.autoSimpleJewelStateMachine = new AutoSimpleJewelStateMachine(this, robotColor);
+        this.autoSimpleJewelStateMachine = new AutoSimpleJewelStateMachine(this, robotColor, robotStartPos);
 
     }
 

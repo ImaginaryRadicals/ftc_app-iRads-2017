@@ -16,6 +16,7 @@ public class AutoSimpleJewelStateMachine {
         STATE_HIT_DETECTED_JEWEL_CW,
         STATE_HIT_OTHER_JEWEL_CCW,
         STATE_ABORT_JEWEL,
+        STATE_DRIVE_TO_GLYPH_BOX,
         STATE_STOP,
     }
 
@@ -32,11 +33,13 @@ public class AutoSimpleJewelStateMachine {
     // Kinematics
     private double moveTime = 1;
     private double movePower = 0.2;
+    public RobotHardware.StartPosition startPosition;
 
 
-    public AutoSimpleJewelStateMachine(RobotHardware opMode, Color.Ftc teamColor) {
+    public AutoSimpleJewelStateMachine(RobotHardware opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
         this.opMode = opMode;
         this.teamColor = teamColor;
+        this.startPosition = startPosition;
     }
 
 
@@ -55,7 +58,7 @@ public class AutoSimpleJewelStateMachine {
         if (state == JewelState.STATE_LOWER_ARM) {
             opMode.armServoBottom();
             
-            if(stateTimer.seconds() > 2) {
+            if(stateTimer.seconds() > 4) {
                 state = JewelState.STATE_DETECT_COLOR;
                 stateTimer.reset();
             }
@@ -79,6 +82,7 @@ public class AutoSimpleJewelStateMachine {
             if(stateTimer.seconds() < moveTime) {
                 opMode.setDriveForTank(movePower,-movePower);
             } else if (stateTimer.seconds() < 2*moveTime ) {
+                opMode.armServoTop();
                 opMode.setDriveForTank(-movePower,movePower);
             } else {
                 opMode.stopAllMotors();
@@ -89,6 +93,7 @@ public class AutoSimpleJewelStateMachine {
             if(stateTimer.seconds() < moveTime) {
                 opMode.setDriveForTank(-movePower,movePower);
             } else if (stateTimer.seconds() < 2*moveTime ) {
+                opMode.armServoTop();
                 opMode.setDriveForTank(movePower,-movePower);
             } else {
                 opMode.stopAllMotors();
