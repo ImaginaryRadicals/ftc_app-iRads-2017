@@ -523,6 +523,9 @@ public abstract class RobotHardware extends OpMode {
     }
 
 
+    public void start() {
+        stopAllMotors();
+    }
 
     /**
      * End of match, stop all actuators.
