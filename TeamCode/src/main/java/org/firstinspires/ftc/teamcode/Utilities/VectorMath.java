@@ -62,6 +62,15 @@ public class VectorMath
         }
     }
 
+    public static void addRemove3(Vector<Double> v, double value) {
+
+        v.add(value);
+        while (v.size() > 3)
+        {
+            v.remove(v.get(0));
+        }
+    }
+
     // Derivative
     // x is the independent variable, y is dependent. Returns derivative for unequally spaced points. xest is the x value at which to evaluate the derivative.
     // x and y vectors don't need to be the same length if they have three elements or more each

@@ -9,10 +9,11 @@ import java.util.Vector;
 public class RollingAverage {
     private Vector<Double> signal = new Vector<Double>();
     private double sum = 0.0;
+    private double average = 0.0;
 
     public int samples = 10;
 
-    Double update(Double current_value)
+    double update(Double current_value)
     {
         signal.add(current_value);
         sum += current_value;
@@ -23,6 +24,10 @@ public class RollingAverage {
             signal.remove(0);
         }
 
-        return sum / signal.size();
+        return average = sum / signal.size();
+    }
+
+    double getAverage() {
+        return average;
     }
 }
