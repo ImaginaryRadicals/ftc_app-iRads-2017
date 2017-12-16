@@ -67,12 +67,33 @@ public class MecanumNavigation {
                 * R_4;
         double deltaY = (-frontLeftRadians + frontRightRadians + backLeftRadians - backRightRadians)
                 * R_4;
+        deltaY *= driveTrainMecanum.lateralScaling;
         double deltaTheta = (-frontLeftRadians + frontRightRadians - backLeftRadians + backRightRadians)
                 * R_4 / wheelbaseK;
 
         return new Navigation2D(deltaX,deltaY,deltaTheta);
     }
 
+    public Mecanum.Wheels deltaWheelsFromPosition(Navigation2D targetPosition) {
+        double deltaX = targetPosition.x - currentPosition.x;
+        double deltaY = targetPosition.y - currentPosition.y;
+        deltaY /= driveTrainMecanum.lateralScaling;
+        double deltaTheta = targetPosition.theta - currentPosition.theta;
+
+        double K = driveTrainMecanum.getK();
+
+        double R_inv = 1.0 / (driveTrainMecanum.wheelDiameter/2);
+
+        // remove time by multiplying by the elapsed time
+        double frontLeft = driveTrainMecanum.radiansToTicks(R_inv * (deltaX - deltaY - K * deltaTheta));
+        double backLeft = driveTrainMecanum.radiansToTicks(R_inv * (deltaX + deltaY - K * deltaTheta));
+        double backRight = driveTrainMecanum.radiansToTicks(R_inv * (deltaX - deltaY + K * deltaTheta));
+        double frontRight = driveTrainMecanum.radiansToTicks(R_inv * (deltaX + deltaY + K * deltaTheta));
+
+        Mecanum.Wheels wheels =  new Mecanum.Wheels(frontLeft, frontRight, backLeft, backRight);
+        wheels.coupledScaleToOne();
+        return wheels;
+    }
 
 
     /**
@@ -167,6 +188,7 @@ public class MecanumNavigation {
         public double wheelbaseWidth;
         public double wheelDiameter;
         public int encoderTicksPerRotation;
+        public double lateralScaling = 1.0;
 
         public DriveTrainMecanum(double wheelbaseLength, double wheelbaseWidth,
                                  double wheelDiameter, int encoderTicksPerRotation) {
@@ -182,6 +204,10 @@ public class MecanumNavigation {
 
         public double ticksToRadians(int deltaTicks) {
             return  2 * Math.PI * deltaTicks / encoderTicksPerRotation;
+        }
+
+        public double radiansToTicks(double radians) {
+            return radians / (2 * Math.PI) * encoderTicksPerRotation;
         }
     }
 

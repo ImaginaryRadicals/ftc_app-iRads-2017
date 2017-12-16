@@ -69,10 +69,10 @@ public class Mecanum {
      */
     public static class Wheels {
         // The mecanum wheels.
-        public final double frontLeft;
-        public final double frontRight;
-        public final double backLeft;
-        public final double backRight;
+        public double frontLeft;
+        public double frontRight;
+        public double backLeft;
+        public double backRight;
 
         /**
          * Sets the wheels to the given values.
@@ -96,6 +96,22 @@ public class Mecanum {
         public Wheels scaleWheelPower(double scalar) {
             return new Wheels(frontLeft * scalar, frontRight * scalar,
                               backLeft * scalar, backRight * scalar);
+        }
+
+        public void coupledScaleToOne()
+        {
+            double eps = 1.0e-4;
+            double maxFront = Math.max(Math.abs(frontLeft), Math.abs(frontRight));
+            double maxRear = Math.max(Math.abs(backLeft), Math.abs(backRight));
+            double max = Math.max(Math.abs(maxFront), Math.abs(maxRear));
+
+            if (max > eps)
+            {
+                frontLeft /= max;
+                frontRight /= max;
+                backLeft /= max;
+                backRight /= max;
+            }
         }
     }
 
