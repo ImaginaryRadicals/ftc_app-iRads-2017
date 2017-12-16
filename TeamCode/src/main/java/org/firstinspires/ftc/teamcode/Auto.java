@@ -72,7 +72,7 @@ public class Auto extends RobotHardware {
     }
 
     @Override
-    public void start() {} {
+    public void start() {
         armServoStored();
         super.init();
         autoSimpleJewelStateMachine.init();
