@@ -31,6 +31,7 @@ public class Manual extends RobotHardware {
     private boolean analog_arm_control = true;
     private boolean slow_mode = false;
     private ClawState clawState = ClawState.CLAW_STOWED;
+    private boolean fastMode = false;
 
     // Variables for the claw states.
     private enum ClawState {
@@ -94,9 +95,9 @@ public class Manual extends RobotHardware {
             if (controller.BOnce()) {
                 exponential_input = !exponential_input;
             }
-            // Cage claw
+            // Full power mode
             if (controller.AOnce()) {
-                storeClaw();
+                fastMode = !fastMode;
             }
         } else {
             // Non-chord robot inputs
@@ -107,6 +108,7 @@ public class Manual extends RobotHardware {
         if (use_telemetry) {
             telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
+            telemetry.addData("Fast", fastMode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
             telemetry.addData("Jewel Target Position", df.format(jewelServoTargetPosition));
@@ -128,10 +130,15 @@ public class Manual extends RobotHardware {
             slow_mode = !slow_mode;
         }
 
-        double sign, exponential, max_rate;
-        sign = forward_drive ? 1 : -1;
-        max_rate = slow_mode ? 0.3 : 1;
-        exponential = exponential_input ? 3 : 1;
+        double sign = forward_drive ? 1 : -1;
+        double max_rate = 0.8;
+        if (slow_mode) {
+            max_rate = 0.3;
+        }
+        else if (fastMode) {
+            max_rate = 1.0;
+        }
+        double exponential = exponential_input ? 3 : 1;
         setDriveForSimpleMecanum(
                 sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
                 sign * max_rate * Math.pow(gamepad1.left_stick_y, exponential),
