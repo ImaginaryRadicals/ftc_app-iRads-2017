@@ -43,7 +43,6 @@ public class Manual extends RobotHardware {
     @Override
     public void init() {
         super.init();
-        armServoTop();
         controller = new Controller(gamepad1);
         loopTimer.reset();
         mecanumNavigation = new MecanumNavigation(this,
@@ -55,6 +54,13 @@ public class Manual extends RobotHardware {
                         getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
                         getEncoderValue(MotorName.DRIVE_BACK_LEFT),
                         getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        storeClaw();
+        armServoTop();
     }
 
     @Override

@@ -518,7 +518,6 @@ public abstract class RobotHardware extends OpMode {
         df = new DecimalFormat("0.00");
         df_prec = new DecimalFormat("0.0000");
 
-        storeClaw();
         stopAllMotors();
     }
 
