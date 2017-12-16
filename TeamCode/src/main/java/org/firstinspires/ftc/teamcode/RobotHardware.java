@@ -61,7 +61,7 @@ public abstract class RobotHardware extends OpMode {
      * @param motor The motor to modify.
      * @param power The power to set [-1, 1].
      */
-    protected void setPower(MotorName motor, double power) {
+    public void setPower(MotorName motor, double power) {
         DcMotor m = allMotors.get(motor.ordinal());
         if (m == null) {
             telemetry.addData("Motor Missing", motor.name());
@@ -88,7 +88,7 @@ public abstract class RobotHardware extends OpMode {
     /**
      * Stops all motors.
      */
-    protected void stopAllMotors() {
+    public void stopAllMotors() {
         for (MotorName m : MotorName.values()) {
             setPower(m, 0);
         }
@@ -135,7 +135,7 @@ public abstract class RobotHardware extends OpMode {
      * @param left The power for the left two motors.
      * @param right The power for the right two motors.
      */
-    protected void setDriveForTank(double left, double right) {
+    public void setDriveForTank(double left, double right) {
         setPower(MotorName.DRIVE_FRONT_LEFT, left);
         setPower(MotorName.DRIVE_BACK_LEFT, left);
         setPower(MotorName.DRIVE_FRONT_RIGHT, right);
@@ -146,7 +146,7 @@ public abstract class RobotHardware extends OpMode {
      * Apply motor power matching the wheels object
      * @param wheels Provides all four mecanum wheel powers, [-1, 1]
      */
-    protected void setDriveForMecanumWheels(Mecanum.Wheels wheels) {
+    public void setDriveForMecanumWheels(Mecanum.Wheels wheels) {
         setPower(MotorName.DRIVE_FRONT_LEFT, wheels.frontLeft);
         setPower(MotorName.DRIVE_BACK_LEFT, wheels.backLeft);
         setPower(MotorName.DRIVE_FRONT_RIGHT, wheels.frontRight);
@@ -160,7 +160,7 @@ public abstract class RobotHardware extends OpMode {
      * @param rightStickX Unmodified Gamepad rightStickX inputs.
      * @param rightStickY Unmodified Gamepad rightStickY inputs.
      */
-    protected void setDriveForSimpleMecanum(double leftStickX, double leftStickY,
+    public void setDriveForSimpleMecanum(double leftStickX, double leftStickY,
                                             double rightStickX, double rightStickY) {
         Mecanum.Wheels wheels = Mecanum.simpleJoystickToWheels (leftStickX, leftStickY, rightStickX, rightStickY);
         setDriveForMecanumWheels(wheels);
@@ -210,7 +210,7 @@ public abstract class RobotHardware extends OpMode {
 
 
     // The servos on the robot.
-    protected enum ServoName {
+    public enum ServoName {
         CLAW_LEFT,
         CLAW_RIGHT,
         JEWEL_ARM,
@@ -237,7 +237,7 @@ public abstract class RobotHardware extends OpMode {
      * @param servo ServoName enum to check
      * @return double servo position [0,1]
      */
-    protected double getAngle(ServoName servo) {
+    public double getAngle(ServoName servo) {
         Servo s = allServos.get(servo.ordinal());
         if (s == null) {
             telemetry.addData("Servo Missing", servo.name());
@@ -249,39 +249,39 @@ public abstract class RobotHardware extends OpMode {
 
     // Sets the Jewel are servo to the init position
 
-    protected void armServoStored() {
+    public void armServoStored() {
         setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_INITIAL);
     }
 
-    protected  void armServoTop() {
+    public  void armServoTop() {
         setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_TOP);
     }
 
-    protected  void armServoBottom() {
+    public  void armServoBottom() {
         setAngle(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM);
     }
 
 
     // Opens the servo claw
-    protected void openClaw() {
+    public void openClaw() {
         setAngle(ServoName.CLAW_LEFT, Constants.LEFT_CLAW_OPEN);
         setAngle(ServoName.CLAW_RIGHT, Constants.RIGHT_CLAW_OPEN);
     }
 
     // Closes the servo claw
-    protected void closeClaw() {
+    public void closeClaw() {
         setAngle(ServoName.CLAW_LEFT, Constants.LEFT_CLAW_CLOSED);
         setAngle(ServoName.CLAW_RIGHT, Constants.RIGHT_CLAW_CLOSED);
     }
 
     // Opens the servo claw slighly
-    protected void slightOpenClaw() {
+    public void slightOpenClaw() {
         setAngle(ServoName.CLAW_LEFT, Constants.LEFT_CLAW_RELEASE);
         setAngle(ServoName.CLAW_RIGHT, Constants.RIGHT_CLAW_RELEASE);
     }
 
     // Closes the servo claw
-    protected void storeClaw() {
+    public void storeClaw() {
         setAngle(ServoName.CLAW_LEFT, Constants.INITIAL_LEFT_CLAW_POS);
         setAngle(ServoName.CLAW_RIGHT, Constants.INITIAL_RIGHT_CLAW_POS);
     }
@@ -338,7 +338,7 @@ public abstract class RobotHardware extends OpMode {
 
 
     // The color sensors on the robot.
-    protected enum ColorSensorName {
+    public enum ColorSensorName {
         JEWEL_COLOR,
     }
 
@@ -347,7 +347,7 @@ public abstract class RobotHardware extends OpMode {
      * @param sensor The sensor to read.
      * @param color The color channel to read intensity.
      */
-    protected int getColorSensor(ColorSensorName sensor, Color.Channel color) {
+    public int getColorSensor(ColorSensorName sensor, Color.Channel color) {
         ColorSensor s = allColorSensors.get(sensor.ordinal());
         if (s == null) {
             telemetry.addData("Color Sensor Missing", sensor.name());
@@ -368,7 +368,7 @@ public abstract class RobotHardware extends OpMode {
      * @param sensor The sensor to set the LED power.
      * @param enabled Whether to turn the LED on.
      */
-    protected void setColorSensorLedEnabled(ColorSensorName sensor,
+    public void setColorSensorLedEnabled(ColorSensorName sensor,
                                          boolean enabled) {
         ColorSensor s = allColorSensors.get(sensor.ordinal());
         if (s == null) {
@@ -382,7 +382,7 @@ public abstract class RobotHardware extends OpMode {
      * Checks JEWEL_COLOR sensor and returns enum based on color detected.
      * @return RED, BLUE, or null
      */
-    protected Color.Ftc getJewelColor() {
+    public Color.Ftc getJewelColor() {
         int red = getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED);
         int blue = getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE);
         if (red > blue) {
@@ -396,7 +396,7 @@ public abstract class RobotHardware extends OpMode {
 
 
     // Possible starting positions.
-    protected enum StartPosition {
+    public enum StartPosition {
         FIELD_CENTER,
         FIELD_CORNER,
     }

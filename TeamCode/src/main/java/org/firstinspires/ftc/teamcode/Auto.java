@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.Utilities.AutoSimpleJewelStateMachine;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 
 
@@ -24,6 +25,7 @@ public class Auto extends RobotHardware {
 
     protected Color.Ftc robotColor;
     protected StartPosition robotStartPos;
+    protected AutoSimpleJewelStateMachine autoSimpleJewelStateMachine;
 
 
     @Autonomous(name="pmt.Red.Center", group="pmtischler")
@@ -65,12 +67,21 @@ public class Auto extends RobotHardware {
     @Override
     public void init() {
         super.init();
-        armServoStored();
+        this.autoSimpleJewelStateMachine = new AutoSimpleJewelStateMachine(this, robotColor);
 
     }
 
     @Override
+    public void start() {} {
+        armServoStored();
+        super.init();
+        autoSimpleJewelStateMachine.init();
+    }
+
+    @Override
     public void loop() {
+
+        autoSimpleJewelStateMachine.update();
 
     }
 }
