@@ -35,7 +35,7 @@ public class Manual extends RobotHardware {
 
     // Variables for the claw states.
     private enum ClawState {
-        CLAW_STOWED, CLAW_OPEN, CLAW_RELEASE, CLAW_CLOSED
+        CLAW_STOWED, CLAW_OPEN, CLAW_RELEASE, CLAW_CLOSED, CLAW_TESTING,
     }
 
 
@@ -82,6 +82,7 @@ public class Manual extends RobotHardware {
 
             stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
             jewelArmTesting();
+            clawTestControls();
 
             // Reset navigation position to zero.
             if (controller.YOnce()) {
@@ -209,7 +210,17 @@ public class Manual extends RobotHardware {
             } else if (controller.leftBumperOnce()) {
                 clawState = ClawState.CLAW_OPEN;
             }
-
+        } else if (clawState == ClawState.CLAW_TESTING) {
+            if (controller.rightBumperOnce()) {
+                clawState = ClawState.CLAW_CLOSED;
+            }
         }
+    }
+
+    private void clawTestControls() {
+        double clawRate = 1;
+        clawState = ClawState.CLAW_TESTING;
+        double clawTarget = controller.left_stick_y * clawRate * lastPeriodSeconds + getAngle(ServoName.CLAW_LEFT);
+        setPositionClaw(clawTarget);
     }
 }
