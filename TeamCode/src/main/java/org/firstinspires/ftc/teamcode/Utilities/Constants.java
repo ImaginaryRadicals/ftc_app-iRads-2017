@@ -9,13 +9,13 @@ public class Constants {
     public static final double MID_SERVO            =  0.5 ;
 
     // public doubles for the left and right CLAW
-    public static final double LEFT_CLAW_OPEN = 0.25;
-    public static final double RIGHT_CLAW_OPEN = 0.25;
-    public static final double LEFT_CLAW_RELEASE = 0.08;
-    public static final double RIGHT_CLAW_RELEASE = 0.08;
+    public static final double LEFT_CLAW_OPEN = 0.31;
+    public static final double RIGHT_CLAW_OPEN = 0.31;
+    public static final double LEFT_CLAW_RELEASE = 0.17;
+    public static final double RIGHT_CLAW_RELEASE = 0.17;
 
-    public static final double LEFT_CLAW_CLOSED = 0.0;
-    public static final double RIGHT_CLAW_CLOSED = 0.0;
+    public static final double LEFT_CLAW_CLOSED = 0.04;
+    public static final double RIGHT_CLAW_CLOSED = 0.04;
     public static final double INITIAL_LEFT_CLAW_POS = 1.0;
     public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
 
