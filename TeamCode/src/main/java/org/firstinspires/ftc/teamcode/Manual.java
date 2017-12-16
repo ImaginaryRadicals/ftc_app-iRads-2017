@@ -44,7 +44,6 @@ public class Manual extends RobotHardware {
     public void init() {
         super.init();
         armServoTop();
-        stopAllMotors();
         controller = new Controller(gamepad1);
         loopTimer.reset();
         mecanumNavigation = new MecanumNavigation(this,
