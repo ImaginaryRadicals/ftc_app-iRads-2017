@@ -11,16 +11,18 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 public class AutoSimpleJewelStateMachine {
 
     public enum JewelState {
+        STATE_START,
         STATE_LOWER_ARM,
         STATE_DETECT_COLOR,
         STATE_HIT_DETECTED_JEWEL_CW,
         STATE_HIT_OTHER_JEWEL_CCW,
         STATE_ABORT_JEWEL,
         STATE_DRIVE_TO_GLYPH_BOX,
+        STATE_LOWER_GLYPH_ARM,
         STATE_STOP,
     }
 
-    public JewelState state = JewelState.STATE_LOWER_ARM;
+    public JewelState state = JewelState.STATE_START;
     private RobotHardware opMode;
     private ElapsedTime stateLoopTimer = new ElapsedTime();
     private double lastStateLoopPeriod = 0;
@@ -37,6 +39,7 @@ public class AutoSimpleJewelStateMachine {
     private double powerParkDrive = 1;
     private double steeringRatioParkDrive = 0.5;
     public RobotHardware.StartPosition startPosition;
+    private int initialArmEncoderTicks = 0;
 
 
     public AutoSimpleJewelStateMachine(RobotHardware opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
@@ -57,28 +60,33 @@ public class AutoSimpleJewelStateMachine {
         lastStateLoopPeriod = stateLoopTimer.seconds();
         stateLoopTimer.reset();
 
-
-        if (state == JewelState.STATE_LOWER_ARM) {
-            opMode.armServoBottom();
+        if (state == JewelState.STATE_START) {
+            initialArmEncoderTicks = opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR);
+            stateTimer.reset();
+            state = JewelState.STATE_LOWER_ARM;
+        } else if (state == JewelState.STATE_LOWER_ARM) {
             opMode.closeClaw();
+            opMode.moveServoAtRate(RobotHardware.ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM,0.5);
 
-            if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < 500) {
-                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
-            } else {
-                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+            // Wait 1 second before lifting arm.
+            if(stateTimer.seconds() > 1) {
+                if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < initialArmEncoderTicks + 500) {
+                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
+                } else {
+                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                }
             }
-            
-            if(stateTimer.seconds() > 4) {
+            // Give jewel arm 2.5 seconds to settle, then detect the color.
+            if(stateTimer.seconds() > 2.5) {
                 state = JewelState.STATE_DETECT_COLOR;
                 stateTimer.reset();
             }
-
         } else if (state == JewelState.STATE_DETECT_COLOR) {
-
+            // Repeatedly attempt to capture a non-unknown color value.
             setJewelColor( opMode.getJewelColor() );
 
-            if(stateTimer.seconds() > 2) {
-
+            // If color is found or 2 second timeout elapses, go to next state
+            if(jewelColor != Color.Ftc.UNKNOWN || stateTimer.seconds() > 2) {
                 stateTimer.reset();
                 if (jewelColor == teamColor) {
                     state = JewelState.STATE_HIT_OTHER_JEWEL_CCW;
@@ -145,15 +153,25 @@ public class AutoSimpleJewelStateMachine {
             }
 
             // Do the driving!
-            if(stateTimer.seconds() < timeParkDrive) {
+            if (stateTimer.seconds() < timeParkDrive) {
                 opMode.setDriveForTank(powerLeft, powerRight);
             } else { // Next State Logic
+                opMode.stopAllMotors();
                 stateTimer.reset();
-                opMode.stop();
+                state = JewelState.STATE_LOWER_GLYPH_ARM;
+            }
+        } else if (state == JewelState.STATE_LOWER_GLYPH_ARM) {
+            if ( opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) > initialArmEncoderTicks) {
+                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR,-0.2);
+            } else {
+                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                opMode.stopAllMotors();
+                stateTimer.reset();
                 state = JewelState.STATE_STOP;
             }
         } else if (state == JewelState.STATE_STOP) {
             opMode.stopAllMotors();
+            opMode.stop();
         } else {
             // error
             opMode.stopAllMotors();

@@ -460,7 +460,11 @@ public abstract class RobotHardware extends OpMode {
     }
 
     public double getLastPeriodSec() {
-        return pastPeriods.lastElement();
+        if (pastPeriods.size() != 0) {
+            return pastPeriods.lastElement();
+        } else {
+            return 0;
+        }
     }
 
     /**
