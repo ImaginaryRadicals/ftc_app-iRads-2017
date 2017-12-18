@@ -71,7 +71,9 @@ public class Manual extends RobotHardware {
         // Chord Commands
         if (controller.leftBumper() && controller.rightBumper()) {
 
-            stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
+            if(!controller.B()) {
+                stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
+            }
             jewelArmTesting();
             jewelServoRateTesting();
             clawTestControls();
@@ -85,8 +87,8 @@ public class Manual extends RobotHardware {
                 analog_arm_control = !analog_arm_control;
             }
             // Toggle exponential input
-            if (controller.BOnce()) {
-                exponential_input = !exponential_input;
+            if (controller.B()) {  // Removed 'once' trigger.
+                driveToPosition(mecanumNavigation, new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
             // Full power mode
             if (controller.AOnce()) {
@@ -196,15 +198,21 @@ public class Manual extends RobotHardware {
                 clawState = ClawState.CLAW_OPEN;
             }
         } else if (clawState == ClawState.CLAW_TESTING) {
+            // No position commanded, leave where it is.
             if (controller.rightBumperOnce()) {
                 clawState = ClawState.CLAW_CLOSED;
+            } else if (controller.leftBumperOnce()) {
+                clawState = ClawState.CLAW_OPEN;
             }
         }
     }
 
     private void clawTestControls() {
         double clawRate = 1;
-        clawState = ClawState.CLAW_TESTING;
+        // If (and only if) the claw is moved in testing, set state to leave claw where it is.
+        if ( controller.left_stick_y != 0 ) {
+            clawState = ClawState.CLAW_TESTING;
+        }
         double clawTarget = controller.left_stick_y * clawRate * getLastPeriodSec() + getAngle(ServoName.CLAW_LEFT);
         clawTarget = Range.clip(clawTarget, 0, 1);
         setPositionClaw(clawTarget);

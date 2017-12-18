@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Mecanum;
+import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 import org.firstinspires.ftc.teamcode.Utilities.VectorMath;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 
@@ -188,6 +189,30 @@ public abstract class RobotHardware extends OpMode {
         setDriveForMecanumWheels(wheels);
     }
 
+    public boolean driveToPosition(MecanumNavigation mecanumNavigation,
+                                   MecanumNavigation.Navigation2D targetPosition,
+                                   double rate) {
+        double distanceThresholdInches = 1;
+        double angleThresholdRadians = 2 * (2*Math.PI/180);
+        rate = Range.clip(rate,0,1);
+        MecanumNavigation.Navigation2D currentPosition =
+                (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
+        MecanumNavigation.Navigation2D deltaPosition = targetPosition.minusEquals(currentPosition);
+
+        // Not Close enough to target, keep moving
+        if ( Math.abs(deltaPosition.x) > distanceThresholdInches ||
+                Math.abs(deltaPosition.y) > distanceThresholdInches ||
+                Math.abs(deltaPosition.theta) > angleThresholdRadians) {
+
+            Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
+            wheels.scaleWheelPower(rate);
+            setDriveForMecanumWheels(wheels);
+            return false;
+        } else {  // Close enough
+            setDriveForMecanumWheels(new Mecanum.Wheels(0,0,0,0));
+            return true;
+        }
+    }
 
     // Arm positions
     protected void raiseArm(){
