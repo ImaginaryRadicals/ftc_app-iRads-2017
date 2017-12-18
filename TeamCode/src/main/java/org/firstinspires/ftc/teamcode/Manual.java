@@ -69,10 +69,11 @@ public class Manual extends RobotHardware {
 
 
         // Chord Commands
-        if (controller.leftBumper()&&controller.rightBumper()) {
+        if (controller.leftBumper() && controller.rightBumper()) {
 
             stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
             jewelArmTesting();
+            jewelServoRateTesting();
             clawTestControls();
 
             // Reset navigation position to zero.
@@ -126,8 +127,7 @@ public class Manual extends RobotHardware {
         double max_rate = 0.8;
         if (slow_mode) {
             max_rate = 0.3;
-        }
-        else if (fastMode) {
+        } else if (fastMode) {
             max_rate = 1.0;
         }
         double exponential = exponential_input ? 3 : 1;
@@ -166,12 +166,6 @@ public class Manual extends RobotHardware {
 
     }
 
-    private void jewelArmTesting() {
-        double servoRate = 1;
-        double stepSize = servoRate * getLastPeriodSec() * -controller.right_stick_y;
-        double jewelServoTargetPosition = Range.clip(stepSize + getAngle(ServoName.JEWEL_ARM), 0, 1);
-        setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
-    }
 
 
     // Claw Control
@@ -215,4 +209,21 @@ public class Manual extends RobotHardware {
         clawTarget = Range.clip(clawTarget, 0, 1);
         setPositionClaw(clawTarget);
     }
+
+    private void jewelArmTesting() {
+        double servoRate = 1;
+        double stepSize = servoRate * getLastPeriodSec() * -controller.right_stick_y;
+        double jewelServoTargetPosition = Range.clip(stepSize + getAngle(ServoName.JEWEL_ARM), 0, 1);
+        setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
+    }
+
+    private void jewelServoRateTesting() {
+        // Alternative Jewel Arm Control Demo
+        if (analog_arm_control && controller.dpadDown()) {
+            moveServoAtRate(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM, 0.4);
+        } else if (analog_arm_control && controller.dpadUp()) {
+            moveServoAtRate(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_INITIAL, 0.4);
+        }
+    }
+
 }
