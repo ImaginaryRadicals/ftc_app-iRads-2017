@@ -30,7 +30,7 @@ public class DiagnosticOpMode extends Manual {
 
     public void showDiagnosticTelemetry() {
 
-        telemetry.addData("Period Average (sec)", df_prec.format(averagePeriodSeconds));
+        telemetry.addData("Period Average (sec)", df_prec.format(getAveragePeriodSec()));
         telemetry.addData("Color RED", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
         telemetry.addData("Color BLUE", getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
         telemetry.addData("Jewel Color:", getJewelColor().toString());

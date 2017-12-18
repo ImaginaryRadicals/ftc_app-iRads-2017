@@ -22,9 +22,6 @@ public class Manual extends RobotHardware {
 
     public Controller controller = null;
     public MecanumNavigation mecanumNavigation;
-    ElapsedTime loopTimer = new ElapsedTime();
-    public double averagePeriodSeconds = 0;
-    private double lastPeriodSeconds = 0;
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
     private boolean exponential_input = true;
@@ -39,13 +36,10 @@ public class Manual extends RobotHardware {
     }
 
 
-    private double jewelServoTargetPosition = Constants.JEWEL_ARM_INITIAL;
-
     @Override
     public void init() {
         super.init();
         controller = new Controller(gamepad1);
-        loopTimer.reset();
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
@@ -66,15 +60,12 @@ public class Manual extends RobotHardware {
 
     @Override
     public void loop() {
+        // Keep timers updated
+        super.loop();
         // Keep controller rising edge trigger updated.
         controller.update();
-        // Average length of an execution period
-        averagePeriodSeconds = periodSec();
         // Update mecanum encoder navigation via opMode context.
         mecanumNavigation.update();
-        // Time period of previous loop iteration.
-        lastPeriodSeconds = loopTimer.seconds();
-        loopTimer.reset();
 
 
         // Chord Commands
@@ -112,7 +103,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Fast", fastMode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
-            telemetry.addData("Jewel Target Position", df.format(jewelServoTargetPosition));
+            telemetry.addData("Jewel Target Position", df.format(getAngle(ServoName.JEWEL_ARM)));
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -177,8 +168,8 @@ public class Manual extends RobotHardware {
 
     private void jewelArmTesting() {
         double servoRate = 1;
-        double stepSize = servoRate * lastPeriodSeconds * -controller.right_stick_y;
-        jewelServoTargetPosition = Range.clip(stepSize + jewelServoTargetPosition, 0, 1);
+        double stepSize = servoRate * getLastPeriodSec() * -controller.right_stick_y;
+        double jewelServoTargetPosition = Range.clip(stepSize + getAngle(ServoName.JEWEL_ARM), 0, 1);
         setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
     }
 
@@ -220,7 +211,8 @@ public class Manual extends RobotHardware {
     private void clawTestControls() {
         double clawRate = 1;
         clawState = ClawState.CLAW_TESTING;
-        double clawTarget = controller.left_stick_y * clawRate * lastPeriodSeconds + getAngle(ServoName.CLAW_LEFT);
+        double clawTarget = controller.left_stick_y * clawRate * getLastPeriodSec() + getAngle(ServoName.CLAW_LEFT);
+        clawTarget = Range.clip(clawTarget, 0, 1);
         setPositionClaw(clawTarget);
     }
 }

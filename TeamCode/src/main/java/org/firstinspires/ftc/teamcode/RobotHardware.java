@@ -42,7 +42,7 @@ public abstract class RobotHardware extends OpMode {
 
     // Execution cycle period monitor.
     private ElapsedTime period  = new ElapsedTime();
-    private Vector pastPeriods  = new Vector();
+    private Vector<Double> pastPeriods  = new Vector();
 
 
     // The motors on the robot.
@@ -416,9 +416,8 @@ public abstract class RobotHardware extends OpMode {
      * then, calculates the average period length.
      * @return Average period of past execution cycles.
      */
-    public double periodSec(){
-
-        pastPeriods.add(period.time());
+    public double updatePeriodTime(){
+        pastPeriods.add(period.seconds());
         period.reset();
         if (pastPeriods.size()>= 30) {
             pastPeriods.remove(0);
@@ -426,6 +425,13 @@ public abstract class RobotHardware extends OpMode {
         return VectorMath.average(pastPeriods);
     }
 
+    public double getAveragePeriodSec() {
+        return VectorMath.average(pastPeriods);
+    }
+
+    public double getLastPeriodSec() {
+        return pastPeriods.lastElement();
+    }
 
     /**
      * Initialize the hardware handles.
@@ -519,11 +525,17 @@ public abstract class RobotHardware extends OpMode {
         df_prec = new DecimalFormat("0.0000");
 
         stopAllMotors();
+        period.reset(); // Reset timer
     }
 
 
     public void start() {
         stopAllMotors();
+        period.reset(); // Reset timer
+    }
+
+    public void loop() {
+        updatePeriodTime();
     }
 
     /**
