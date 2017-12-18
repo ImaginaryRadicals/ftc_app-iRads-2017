@@ -33,7 +33,7 @@ public class AutoSimpleJewelStateMachine {
     public Color.Ftc jewelColor = Color.Ftc.UNKNOWN;
 
     // Kinematics
-    private double timeHitJewel = 1;
+    private double timeHitJewel = 0.5;
     private double powerHitJewel = 0.2;
     private double timeParkDrive = 1.5;
     private double powerParkDrive = 1;
@@ -66,7 +66,7 @@ public class AutoSimpleJewelStateMachine {
             state = JewelState.STATE_LOWER_ARM;
         } else if (state == JewelState.STATE_LOWER_ARM) {
             opMode.closeClaw();
-            opMode.moveServoAtRate(RobotHardware.ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM,0.5);
+            opMode.moveServoAtRate(RobotHardware.ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM,0.7);
 
             // Wait 1 second before lifting arm.
             if(stateTimer.seconds() > 1) {
@@ -77,7 +77,7 @@ public class AutoSimpleJewelStateMachine {
                 }
             }
             // Give jewel arm 2.5 seconds to settle, then detect the color.
-            if(stateTimer.seconds() > 2.5) {
+            if(stateTimer.seconds() > 2) {
                 state = JewelState.STATE_DETECT_COLOR;
                 stateTimer.reset();
             }
