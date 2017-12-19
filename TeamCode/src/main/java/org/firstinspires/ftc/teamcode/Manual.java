@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.Utilities.AutoDrive;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 import org.firstinspires.ftc.teamcode.Utilities.Controller;
@@ -22,6 +23,7 @@ public class Manual extends RobotHardware {
 
     public Controller controller = null;
     public MecanumNavigation mecanumNavigation;
+    public AutoDrive autoDrive;
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
     private boolean exponential_input = true;
@@ -49,6 +51,7 @@ public class Manual extends RobotHardware {
                         getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
                         getEncoderValue(MotorName.DRIVE_BACK_LEFT),
                         getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
+        autoDrive = new AutoDrive(this, mecanumNavigation);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class Manual extends RobotHardware {
         // Chord Commands
         if (controller.leftBumper() && controller.rightBumper()) {
 
-            if(!controller.B()) {
+            if(!controller.B() && !controller.X()) {
                 stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
             }
             jewelArmTesting();
@@ -83,8 +86,8 @@ public class Manual extends RobotHardware {
                 mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0, 0, 0));
             }
             // Toggle analog arm control.
-            if (controller.XOnce()) {
-                analog_arm_control = !analog_arm_control;
+            if (controller.X()) {
+                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
             // Toggle exponential input
             if (controller.B()) {  // Removed 'once' trigger.

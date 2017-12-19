@@ -19,6 +19,13 @@ public class AutoDrive {
         this.mecanumNavigation = mecanumNavigation;
     }
 
+    /**
+     * Drive to position. Simple calculation, drives in single rotational arc.
+     * In general, not the most efficient path.
+     * @param targetPosition
+     * @param rate
+     * @return boolean, true if currentPosition is near targetPosition.
+     */
     public boolean driveToPosition(MecanumNavigation.Navigation2D targetPosition, double rate) {
         double distanceThresholdInches = 1;
         double angleThresholdRadians = 2 * (2*Math.PI/180);
@@ -40,7 +47,39 @@ public class AutoDrive {
             opMode.setDriveForMecanumWheels(new Mecanum.Wheels(0,0,0,0));
             return true;
         }
+    }
+
+    public boolean rotateThenDriveToPosition(MecanumNavigation.Navigation2D targetPosition, double rate) {
+        double distanceThresholdInches = 1;
+        double angleThresholdRadians = 2 * (2*Math.PI/180);
+        rate = Range.clip(rate,0,1);
+        MecanumNavigation.Navigation2D currentPosition =
+                (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
+        MecanumNavigation.Navigation2D deltaPosition = targetPosition.minusEquals(currentPosition);
+
+        // Not Close enough to target, keep moving
+        if ( Math.abs(deltaPosition.theta) > angleThresholdRadians) {
+
+            MecanumNavigation.Navigation2D rotationTarget = (MecanumNavigation.Navigation2D)currentPosition.clone();
+            rotationTarget.theta = targetPosition.theta; // Only rotate to the target at first.
+            Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
+            wheels.scaleWheelPower(rate);
+            opMode.setDriveForMecanumWheels(wheels);
+            return false;
+            // After rotating, begin correcting translation.
+        } else if (Math.abs(deltaPosition.x) > distanceThresholdInches ||
+                   Math.abs(deltaPosition.y) > distanceThresholdInches) {
+            Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
+            wheels.scaleWheelPower(rate);
+            opMode.setDriveForMecanumWheels(wheels);
+            return false;
+        } else {  // Close enough
+            opMode.setDriveForMecanumWheels(new Mecanum.Wheels(0,0,0,0));
+            return true;
+        }
 
     }
+
+
 
 }
