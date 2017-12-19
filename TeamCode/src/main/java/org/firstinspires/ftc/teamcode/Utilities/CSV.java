@@ -15,16 +15,16 @@ public class CSV {
     private Vector<Vector<Double>> data = new Vector<>();
     private Vector<String> titles = new Vector<>();
 
-    CSV(RobotHardware robotHardware)
+    public CSV(RobotHardware robotHardware)
     {
         this.robotHardware = robotHardware;
     }
 
-    void add(Vector<Double> new_data)
+    public void add(Vector<Double> new_data)
     {
         data.add(new_data);
     }
-    void add(double[] new_data)
+    public void add(double[] new_data)
     {
         Vector<Double> vec = new Vector<>();
         for (double value : new_data)
@@ -32,12 +32,12 @@ public class CSV {
         data.add(vec);
     }
 
-    void csv(String fileName)
+    public void csv(String fileName)
     {
         csv(fileName, new Vector<String>());
     }
 
-    void csv(String fileName, Vector<String> titles)
+    public void csv(String fileName, Vector<String> titles)
     {
         try{
             FileOutputStream outputStream = robotHardware.hardwareMap.appContext.openFileOutput(fileName, Context.MODE_PRIVATE);
