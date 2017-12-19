@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Vision;
 
+import com.qualcomm.robotcore.robot.Robot;
+
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -13,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 /**
  * Reads Vuforia markers off the camera.
@@ -39,8 +42,16 @@ public class SimpleVuforia {
      * Creates a Vuforia localizer and starts localization.
      * @param vuforiaLicenseKey The license key to access Vuforia code.
      */
-    public SimpleVuforia(String vuforiaLicenseKey) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+    public SimpleVuforia(String vuforiaLicenseKey, RobotHardware opMode, boolean useCameraMonitor) {
+        this.opMode = opMode;
+        VuforiaLocalizer.Parameters parameters;
+        if (useCameraMonitor) {
+            // Show camera
+            int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+            parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        } else { // Don't use camera monitor
+            parameters = new VuforiaLocalizer.Parameters();
+        }
         parameters.vuforiaLicenseKey = vuforiaLicenseKey;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
@@ -62,4 +73,6 @@ public class SimpleVuforia {
     private VuforiaLocalizer vuforia;
     private VuforiaTrackables relicTrackables;
     private VuforiaTrackable relicTemplate;
+    // opMode reference
+    private RobotHardware opMode;
 }

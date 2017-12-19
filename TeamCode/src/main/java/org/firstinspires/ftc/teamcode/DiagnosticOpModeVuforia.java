@@ -18,20 +18,19 @@ import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 public class DiagnosticOpModeVuforia extends DiagnosticOpMode {
 
     private SimpleVuforia vuforia;
+    public int msStuckDetectInit = 10000;
 
     @Override
     public void init() {
         super.init();
-        vuforia = new SimpleVuforia(getVuforiaLicenseKey());
+        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, true);
         telemetry.addData("Diagnostic Vuforia Mode ", " Initialized");
     }
 
     @Override
     public void loop() {
-        super.loop();
         RelicRecoveryVuMark vuMark = vuforia.detectMark();
-        telemetry.addData("Vuforia Glyph Position", vuMark.name());
-
+        telemetry.addData("Vuforia Glyph Position", vuMark);
         super.loop();
     }
 
