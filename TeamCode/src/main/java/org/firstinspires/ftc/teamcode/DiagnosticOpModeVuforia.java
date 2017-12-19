@@ -31,6 +31,7 @@ public class DiagnosticOpModeVuforia extends DiagnosticOpMode {
     public void loop() {
         RelicRecoveryVuMark vuMark = vuforia.detectMark();
         telemetry.addData("Vuforia Glyph Position", vuMark);
+        vuforia.displayVuMarkPose();
         super.loop();
     }
 
