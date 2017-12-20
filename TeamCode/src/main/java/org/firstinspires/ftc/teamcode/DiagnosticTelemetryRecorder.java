@@ -24,6 +24,7 @@ public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
     public void init() {
         super.init();
         csvWriter = new CSV(this);
+        csvWriter.open("telemetry.csv");
     }
 
     @Override
@@ -34,50 +35,37 @@ public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
     @Override
     public void loop() {
         super.loop();
-        recordData.clear(); // Reset record fields for this loop iteration.
+
         // setFieldData sets both titles and recordData.
-        setFieldData("time",time);
-        setFieldData("red_channel",(double)getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
-        setFieldData("blue_channel",(double)getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
-        setFieldData("light_level",(double)getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName.ODS_RIGHT));
+        csvWriter.addFieldToRecord("time",time);
+        csvWriter.addFieldToRecord("red_channel",(double)getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.RED));
+        csvWriter.addFieldToRecord("blue_channel",(double)getColorSensor(ColorSensorName.JEWEL_COLOR, Color.Channel.BLUE));
+        csvWriter.addFieldToRecord("light_level",getOpticalDistanceSensorLightLevel(OpticalDistanceSensorName.ODS_RIGHT));
         // Capture all servo positions:
         for (ServoName s : ServoName.values()) {
-            setFieldData(s.name(), getAngle(s));
+            csvWriter.addFieldToRecord(s.name(), getAngle(s));
         }
         // Capture all motor encoder values:
         for (MotorName m : MotorName.values()) {
-            setFieldData(m.name()+"_ticks", getEncoderValue(m));
+            csvWriter.addFieldToRecord(m.name()+"_ticks", (double)getEncoderValue(m));
         }
         // Capture all motor power levels:
         for (MotorName m : MotorName.values()) {
-            setFieldData(m.name()+"_power", getPower(m));
+            csvWriter.addFieldToRecord(m.name()+"_power", getPower(m));
         }
         // Capture mecanumNavigation current position
-        setFieldData("x_in",mecanumNavigation.currentPosition.x);
-        setFieldData("y_in",mecanumNavigation.currentPosition.y);
-        setFieldData("theta_rad",mecanumNavigation.currentPosition.theta);
+        csvWriter.addFieldToRecord("x_in",mecanumNavigation.currentPosition.x);
+        csvWriter.addFieldToRecord("y_in",mecanumNavigation.currentPosition.y);
+        csvWriter.addFieldToRecord("theta_rad",mecanumNavigation.currentPosition.theta);
 
-        csvWriter.add((Vector<Double>) recordData.clone());
-        isTitleVectorInitialized = true;
+        // Writes record to file if writer is open.
+        csvWriter.completeRecord();
     }
 
     @Override
     public void stop() {
         super.stop();
-        csvWriter.csv(new String("telemetry.csv"), recordTitles);
-    }
-
-    /**
-     * Sets field titles and data in one place.
-     * isTitleVectorInitialized must be set to true at the end of the loop.
-     * @param fieldTitle
-     * @param fieldData
-     */
-    private void setFieldData(String fieldTitle, double fieldData) {
-        if (isTitleVectorInitialized == false) {
-            recordTitles.add(fieldTitle);
-        }
-        recordData.add(fieldData);
+        csvWriter.close();
     }
 
 }
