@@ -73,6 +73,21 @@ public abstract class RobotHardware extends OpMode {
     }
 
     /**
+     * Get motor power
+     * @param motor MotorName
+     * @return Motor Power, or zero if it cannot be found
+     */
+    public double getPower(MotorName motor) {
+        DcMotor m = allMotors.get(motor.ordinal());
+        if (m == null) {
+            telemetry.addData("Motor Missing", motor.name());
+            return 0;
+        } else {
+            return m.getPower();
+        }
+    }
+
+    /**
      * Gets the encoder value of the motor.
      * @param motor MotorName enum value.
      * @return integer encoder position in ticks.
