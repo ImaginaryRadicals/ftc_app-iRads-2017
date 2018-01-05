@@ -85,11 +85,11 @@ public class Manual extends RobotHardware {
             if (controller.YOnce()) {
                 mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0, 0, 0));
             }
-            // Toggle analog arm control.
+            // Test autoDrive
             if (controller.X()) {
                 autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
-            // Toggle exponential input
+            // Test autoDrive
             if (controller.B()) {  // Removed 'once' trigger.
                 driveToPosition(mecanumNavigation, new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
