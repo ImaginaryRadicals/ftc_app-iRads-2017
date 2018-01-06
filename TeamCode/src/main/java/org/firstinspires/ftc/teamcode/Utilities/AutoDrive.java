@@ -51,7 +51,7 @@ public class AutoDrive {
 
     public boolean rotateThenDriveToPosition(MecanumNavigation.Navigation2D targetPosition, double rate) {
         double distanceThresholdInches = 1;
-        double angleThresholdRadians = 2 * (2*Math.PI/180);
+        double angleThresholdRadians = 4.0 * (Math.PI/180.0);
         rate = Range.clip(rate,0,1);
         MecanumNavigation.Navigation2D currentPosition =
                 (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
@@ -62,8 +62,13 @@ public class AutoDrive {
 
             MecanumNavigation.Navigation2D rotationTarget = (MecanumNavigation.Navigation2D)currentPosition.clone();
             rotationTarget.theta = targetPosition.theta; // Only rotate to the target at first.
-            Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
-            wheels.scaleWheelPower(rate);
+            Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(rotationTarget);
+            if (Math.abs(deltaPosition.theta) < 35.0 * (Math.PI/180.0)) {
+                double reducedRate = rate * (0.1 + 0.5 * Math.abs(deltaPosition.theta)/(35.0 * (Math.PI/180.0)));
+                wheels.scaleWheelPower(reducedRate);
+            } else {
+                wheels.scaleWheelPower(rate);
+            }
             opMode.setDriveForMecanumWheels(wheels);
             return false;
             // After rotating, begin correcting translation.

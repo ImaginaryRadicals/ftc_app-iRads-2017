@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Utilities;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by Ashley on 12/8/2017.
  */
@@ -176,6 +178,11 @@ public class MecanumNavigation {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        public String toString() {
+            DecimalFormat df = new DecimalFormat("0.00");
+            return df.format(x) + " , " + df.format(y) + " , " + df.format(theta);
         }
     }
 
