@@ -56,26 +56,25 @@ public class AutoDrive {
         MecanumNavigation.Navigation2D currentPosition =
                 (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
         MecanumNavigation.Navigation2D deltaPosition = targetPosition.minusEquals(currentPosition);
+        double deltaDistance = Math.sqrt( Math.pow(deltaPosition.x,2) + Math.pow(deltaPosition.y,2));
 
+        double rateScale;
         // Not Close enough to target, keep moving
         if ( Math.abs(deltaPosition.theta) > angleThresholdRadians) {
 
             MecanumNavigation.Navigation2D rotationTarget = (MecanumNavigation.Navigation2D)currentPosition.clone();
             rotationTarget.theta = targetPosition.theta; // Only rotate to the target at first.
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(rotationTarget);
-            if (Math.abs(deltaPosition.theta) < 50.0 * (Math.PI/180.0)) {
-                double reducedRate = rate * (0.1 + 0.7 * Math.abs(deltaPosition.theta)/(50.0 * (Math.PI/180.0)));
-                wheels = wheels.scaleWheelPower(reducedRate);
-            } else {
-                wheels = wheels.scaleWheelPower(rate);
-            }
+            rateScale = rampDown(Math.abs(deltaPosition.theta)*(180/Math.PI), 50, 0.8, 0.1);
+            wheels = wheels.scaleWheelPower(rateScale * rate);
             opMode.setDriveForMecanumWheels(wheels);
             return false;
             // After rotating, begin correcting translation.
         } else if (Math.abs(deltaPosition.x) > distanceThresholdInches ||
                    Math.abs(deltaPosition.y) > distanceThresholdInches) {
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
-            wheels.scaleWheelPower(rate);
+            rateScale = rampDown(deltaDistance, 5, 0.8, 0.1);
+            wheels = wheels.scaleWheelPower(rateScale * rate);
             opMode.setDriveForMecanumWheels(wheels);
             return false;
         } else {  // Close enough
@@ -85,6 +84,16 @@ public class AutoDrive {
 
     }
 
+    public double rampDown(double errSignal, double signalRampDownThreshold, double maxRatio, double minRatio) {
+        double output;
+        double standardOutput = 1.0;
+        if (errSignal > signalRampDownThreshold) {
+            output = standardOutput;
+        } else {
+            output = standardOutput * (minRatio + (maxRatio - minRatio) * errSignal/signalRampDownThreshold);
+        }
+        return Range.clip(Math.abs(output),0,1);
+    }
 
 
 }
