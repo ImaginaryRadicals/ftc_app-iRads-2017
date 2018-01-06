@@ -51,7 +51,7 @@ public class AutoDrive {
 
     public boolean rotateThenDriveToPosition(MecanumNavigation.Navigation2D targetPosition, double rate) {
         double distanceThresholdInches = 1;
-        double angleThresholdRadians = 4.0 * (Math.PI/180.0);
+        double angleThresholdRadians = 2.0 * (Math.PI/180.0);
         rate = Range.clip(rate,0,1);
         MecanumNavigation.Navigation2D currentPosition =
                 (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
@@ -70,12 +70,12 @@ public class AutoDrive {
             rotationTarget.theta = targetPosition.theta; // Only rotate to the target at first.
             opMode.telemetry.addData("rotationTarget", rotationTarget.toString());
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(rotationTarget);
-            if (Math.abs(deltaPosition.theta) < 35.0 * (Math.PI/180.0)) {
-                double reducedRate = rate * (0.1 + 0.5 * Math.abs(deltaPosition.theta)/(35.0 * (Math.PI/180.0)));
+            if (Math.abs(deltaPosition.theta) < 50.0 * (Math.PI/180.0)) {
+                double reducedRate = rate * (0.1 + 0.7 * Math.abs(deltaPosition.theta)/(50.0 * (Math.PI/180.0)));
                 opMode.telemetry.addData("reducedRate", reducedRate);
-                wheels.scaleWheelPower(reducedRate);
+                wheels = wheels.scaleWheelPower(reducedRate);
             } else {
-                wheels.scaleWheelPower(rate);
+                wheels = wheels.scaleWheelPower(rate);
             }
             opMode.setDriveForMecanumWheels(wheels);
             return false;
