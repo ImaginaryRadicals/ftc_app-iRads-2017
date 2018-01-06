@@ -57,22 +57,14 @@ public class AutoDrive {
                 (MecanumNavigation.Navigation2D)mecanumNavigation.currentPosition.clone();
         MecanumNavigation.Navigation2D deltaPosition = targetPosition.minusEquals(currentPosition);
 
-        // Debugging
-        opMode.telemetry.addData("angleThreshRad",angleThresholdRadians);
-        opMode.telemetry.addData("deltaPosition",deltaPosition.toString());
-        opMode.telemetry.addData("deltaTheta",deltaPosition.theta);
-
         // Not Close enough to target, keep moving
         if ( Math.abs(deltaPosition.theta) > angleThresholdRadians) {
-            opMode.telemetry.addData("Stage","1");
 
             MecanumNavigation.Navigation2D rotationTarget = (MecanumNavigation.Navigation2D)currentPosition.clone();
             rotationTarget.theta = targetPosition.theta; // Only rotate to the target at first.
-            opMode.telemetry.addData("rotationTarget", rotationTarget.toString());
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(rotationTarget);
             if (Math.abs(deltaPosition.theta) < 50.0 * (Math.PI/180.0)) {
                 double reducedRate = rate * (0.1 + 0.7 * Math.abs(deltaPosition.theta)/(50.0 * (Math.PI/180.0)));
-                opMode.telemetry.addData("reducedRate", reducedRate);
                 wheels = wheels.scaleWheelPower(reducedRate);
             } else {
                 wheels = wheels.scaleWheelPower(rate);
@@ -82,18 +74,17 @@ public class AutoDrive {
             // After rotating, begin correcting translation.
         } else if (Math.abs(deltaPosition.x) > distanceThresholdInches ||
                    Math.abs(deltaPosition.y) > distanceThresholdInches) {
-            opMode.telemetry.addData("Stage","2");
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
             wheels.scaleWheelPower(rate);
             opMode.setDriveForMecanumWheels(wheels);
             return false;
         } else {  // Close enough
-            opMode.telemetry.addData("Stage","3");
             opMode.setDriveForMecanumWheels(new Mecanum.Wheels(0,0,0,0));
             return true;
         }
 
     }
+
 
 
 }
