@@ -287,4 +287,19 @@ public class MecanumNavigation {
             return null;
         }
     }
+
+    /**
+     * Round an angle in radians so it falls within [-PI, PI]
+     * @param radians
+     * @return
+     */
+    public double radianRound(double radians) {
+        while (radians > Math.PI) {
+            radians -= 2*Math.PI;
+        }
+        while (radians < - Math.PI) {
+            radians += 2*Math.PI;
+        }
+        return radians;
+    }
 }
