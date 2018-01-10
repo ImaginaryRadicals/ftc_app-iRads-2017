@@ -76,11 +76,36 @@ public class MecanumNavigation {
         return new Navigation2D(deltaX,deltaY,deltaTheta);
     }
 
+    /**
+     * Return a wheels object to move from the current position to the target position.
+     * @param targetPosition Navigation2D
+     * @return Wheels power object, scaled to 1.
+     */
     public Mecanum.Wheels deltaWheelsFromPosition(Navigation2D targetPosition) {
         double deltaX = targetPosition.x - currentPosition.x;
         double deltaY = targetPosition.y - currentPosition.y;
-        deltaY /= driveTrainMecanum.lateralScaling;
         double deltaTheta = targetPosition.theta - currentPosition.theta;
+
+        double bodyX = deltaX * Math.cos(currentPosition.theta) + deltaY * Math.sin(currentPosition.theta);
+        double bodyY = deltaX * Math.cos(currentPosition.theta) + deltaX * Math.sin(currentPosition.theta);
+        double bodyTheta = deltaTheta;
+
+        return deltaWheelsFromBodyRelativeMotion(new Navigation2D(bodyX, bodyY, bodyTheta));
+    }
+
+
+    /**
+     * Return a wheels object to move in the 3 specified body relative directions.
+     * Note that the direction of X and Y are always relative to the robot body,
+     * even as it rotates.
+     * @param bodyRelativeMovement Nav2d, a body relative movement, non-euclidean.
+     * @return Wheels power object, scaled to 1.
+     */
+    public Mecanum.Wheels deltaWheelsFromBodyRelativeMotion(Navigation2D bodyRelativeMovement) {
+        double deltaX = bodyRelativeMovement.x;
+        double deltaY = bodyRelativeMovement.y;
+        deltaY /= driveTrainMecanum.lateralScaling;
+        double deltaTheta = bodyRelativeMovement.theta;
 
         double K = driveTrainMecanum.getK();
 
