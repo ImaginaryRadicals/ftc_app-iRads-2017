@@ -28,6 +28,7 @@ public class AutoDeluxe extends RobotHardware {
     protected StartPosition robotStartPos;
     protected AutoDeluxeStateMachine autoDeluxeStateMachine;
     private SimpleVuforia vuforia;
+    public RelicRecoveryVuMark glyphPositionVuMark;
 
 
     @Autonomous(name="deluxe.Red.Center", group="deluxeAuto")
@@ -97,8 +98,16 @@ public class AutoDeluxe extends RobotHardware {
         super.loop();
         mecanumNavigation.update();
         RelicRecoveryVuMark vuMark = vuforia.detectMark();
+        setVumark(vuMark); // Store last non-UNKNOWN vumark detected.
         telemetry.addData("Vuforia Glyph Position", vuMark);
         autoDeluxeStateMachine.update();
         mecanumNavigation.displayPosition();
     }
+
+    private void setVumark(RelicRecoveryVuMark detectedVuMark) {
+        if ( detectedVuMark != RelicRecoveryVuMark.UNKNOWN) {
+            this.glyphPositionVuMark = detectedVuMark;
+        }
+    }
 }
+
