@@ -100,6 +100,9 @@ public class MecanumNavigation {
 
     /**
      * 2d position plus angular orientation.
+     * x is in inches, forward
+     * y is in inches, left
+     * theta is in radians, CCW
      */
     public static class Navigation2D implements Cloneable{
         public double x = 0;
@@ -107,6 +110,12 @@ public class MecanumNavigation {
         // Rotation degrees CCW
         public double theta = 0;
 
+        /**
+         *
+         * @param x inches
+         * @param y inches
+         * @param theta radians CCW
+         */
         public Navigation2D(double x, double y, double theta) {
             this.x = x;
             this.y = y;

@@ -8,8 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.teamcode.Utilities.AutoDeluxeStateMachine;
+import org.firstinspires.ftc.teamcode.Utilities.AutoDrive;
 import org.firstinspires.ftc.teamcode.Utilities.AutoSimpleJewelStateMachine;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
+import org.firstinspires.ftc.teamcode.Utilities.Constants;
+import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 
 /**
@@ -19,7 +22,8 @@ import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 public class AutoDeluxe extends RobotHardware {
 
 
-
+    public MecanumNavigation mecanumNavigation;
+    public AutoDrive autoDrive;
     protected Color.Ftc robotColor;
     protected StartPosition robotStartPos;
     protected AutoDeluxeStateMachine autoDeluxeStateMachine;
@@ -65,23 +69,36 @@ public class AutoDeluxe extends RobotHardware {
     @Override
     public void init() {
         super.init();
+        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, false, false);
+        mecanumNavigation = new MecanumNavigation(this,
+                new MecanumNavigation.DriveTrainMecanum(
+                        Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
+                        Constants.DRIVE_WHEEL_DIAMETER_INCHES, Constants.DRIVE_WHEEL_STEPS_PER_ROT));
+        mecanumNavigation.initialize(new MecanumNavigation.Navigation2D(0, 0, 0),
+                new MecanumNavigation.WheelTicks(getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
+                        getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),
+                        getEncoderValue(MotorName.DRIVE_BACK_LEFT),
+                        getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
+        autoDrive = new AutoDrive(this, mecanumNavigation);
+        // Finally, construct the state machine.
         autoDeluxeStateMachine = new AutoDeluxeStateMachine(this, vuforia, robotColor, robotStartPos);
+        telemetry.addData("Initialization:", "Successful!");
     }
 
     @Override
     public void start() {
         armServoTop();
         super.init();
-        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, true, false);
         autoDeluxeStateMachine.init();
     }
 
     @Override
     public void loop() {
         super.loop();
+        mecanumNavigation.update();
         RelicRecoveryVuMark vuMark = vuforia.detectMark();
         telemetry.addData("Vuforia Glyph Position", vuMark);
         autoDeluxeStateMachine.update();
-
+        mecanumNavigation.displayPosition();
     }
 }

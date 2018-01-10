@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Utilities;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.teamcode.Auto;
+import org.firstinspires.ftc.teamcode.AutoDeluxe;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 
@@ -28,7 +30,7 @@ public class AutoDeluxeStateMachine {
     }
 
     public AutoState state = AutoState.STATE_START;
-    private RobotHardware opMode;
+    private AutoDeluxe opMode;
     private SimpleVuforia vuforia;
     private ElapsedTime stateLoopTimer = new ElapsedTime();
     private double lastStateLoopPeriod = 0;
@@ -42,29 +44,32 @@ public class AutoDeluxeStateMachine {
     // Kinematics
     private double timeHitJewel = 0.5;
     private double powerHitJewel = 0.2;
-    private double timeParkDrive = 1.5;
-    private double powerParkDrive = 1;
-    private double steeringRatioParkDrive = 0.5;
     public RobotHardware.StartPosition startPosition;
     private int initialArmEncoderTicks = 0;
+    private int currentDriveWaypoint = 0;
 
     // Motions for each starting position
-    private ArrayList<MecanumNavigation.Navigation2D> blueCorner = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(36,0,0),
-            new MecanumNavigation.Navigation2D(36,12,0)));
-    private ArrayList<MecanumNavigation.Navigation2D> blueCenter = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(36,0,0),
-            new MecanumNavigation.Navigation2D(36,12,90)));
-    private ArrayList<MecanumNavigation.Navigation2D> redCorner = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(-36,0,0),
-            new MecanumNavigation.Navigation2D(-36,-12,180)));
-    private ArrayList<MecanumNavigation.Navigation2D> redCenter = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(-36,0,0),
-            new MecanumNavigation.Navigation2D(-36,12,90)));
+    private ArrayList<MecanumNavigation.Navigation2D> blueCornerWaypoints = new ArrayList<>(Arrays.asList(
+            new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
+            new MecanumNavigation.Navigation2D(36,12, degreesToRadians(0))));
+    private ArrayList<MecanumNavigation.Navigation2D> blueCenterWaypoints = new ArrayList<>(Arrays.asList(
+            new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
+            new MecanumNavigation.Navigation2D(36,12, degreesToRadians(90))));
+    private ArrayList<MecanumNavigation.Navigation2D> redCornerWaypoints = new ArrayList<>(Arrays.asList(
+            new MecanumNavigation.Navigation2D(-36,0, degreesToRadians(0)),
+            new MecanumNavigation.Navigation2D(-36,-12, degreesToRadians(180))));
+//    private ArrayList<MecanumNavigation.Navigation2D> redCenterWaypoints = new ArrayList<>(Arrays.asList(
+//            new MecanumNavigation.Navigation2D(-36,0,degreesToRadians(0)),
+//            new MecanumNavigation.Navigation2D(-36,12,degreesToRadians(90))));
+    private ArrayList<MecanumNavigation.Navigation2D> redCenterWaypoints = new ArrayList<>(Arrays.asList(
+            new MecanumNavigation.Navigation2D(12,0, degreesToRadians(0)),
+            new MecanumNavigation.Navigation2D(12,12, degreesToRadians(90)),
+            new MecanumNavigation.Navigation2D(0,12, degreesToRadians(180)),
+            new MecanumNavigation.Navigation2D(0,0, degreesToRadians(270)),
+            new MecanumNavigation.Navigation2D(0,0, degreesToRadians(360))));
 
 
-
-    public AutoDeluxeStateMachine(RobotHardware opMode, SimpleVuforia vuforia, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
+    public AutoDeluxeStateMachine(AutoDeluxe opMode, SimpleVuforia vuforia, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
         this.opMode = opMode;
         this.vuforia = vuforia;
         this.teamColor = teamColor;
@@ -149,36 +154,45 @@ public class AutoDeluxeStateMachine {
                 stateTimer.reset();
             }
         } else if (state == AutoState.STATE_DRIVE_TO_GLYPH_BOX) {
-            double direction, powerLeft, powerRight;
+            boolean arrivedAtWaypoint = false;
+            ArrayList<MecanumNavigation.Navigation2D> waypointArray;
+            // Added to ensure array is initialized.
+            waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
 
-            // Calculate driving motion
+            // Select Driving waypoints
             if (teamColor == Color.Ftc.BLUE) {
-                direction = 1;
+                if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
+                    waypointArray = blueCornerWaypoints;
+                } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
+                    waypointArray = blueCenterWaypoints;
+                }
             } else if (teamColor == Color.Ftc.RED) {
-                direction = -1;
+                if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
+                    waypointArray = redCornerWaypoints;
+                } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
+                    waypointArray = redCenterWaypoints;
+                }
             } else {
-                direction = 0;
                 opMode.stopAllMotors();
                 stateTimer.reset();
                 state = AutoState.STATE_STOP;
             }
 
-            powerLeft = direction * powerParkDrive * 1;
-            powerRight = direction * powerParkDrive * 1;
-
-            // Add steering
-            if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
-                // Left Wheel fast, Right wheel slow
-                powerRight *= steeringRatioParkDrive;
-            } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
-                // Right Wheel fast, Left wheel slow
-                powerLeft *= steeringRatioParkDrive;
+            // Do the driving
+            if(currentDriveWaypoint < waypointArray.size() ) {
+                // Show Target Status and debug info
+                opMode.telemetry.addData("Current Waypoint: ", currentDriveWaypoint);
+                opMode.telemetry.addData("Target", waypointArray.get(currentDriveWaypoint).toString());
+                arrivedAtWaypoint = opMode.autoDrive.rotateThenDriveToPosition(waypointArray.get(currentDriveWaypoint),0.5);
+            }
+            if ( arrivedAtWaypoint) {
+                ++currentDriveWaypoint;
             }
 
-            // Do the driving!
-            if (stateTimer.seconds() < timeParkDrive) {
-                opMode.setDriveForTank(powerLeft, powerRight);
-            } else { // Next State Logic
+
+
+            // Next State Logic
+            if (currentDriveWaypoint >= waypointArray.size()) {
                 opMode.stopAllMotors();
                 stateTimer.reset();
                 state = AutoState.STATE_LOWER_GLYPH_ARM;
@@ -215,6 +229,13 @@ public class AutoDeluxeStateMachine {
         }
     }
 
+    private double degreesToRadians(double degrees) {
+        return degrees * Math.PI / 180;
+    }
+
+    private double radiansToDegrees(double radians) {
+        return radians * 180 / Math.PI;
+    }
 
 
 
