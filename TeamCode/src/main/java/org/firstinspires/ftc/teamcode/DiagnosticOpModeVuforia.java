@@ -23,7 +23,7 @@ public class DiagnosticOpModeVuforia extends DiagnosticOpMode {
     @Override
     public void init() {
         super.init();
-        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, true);
+        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, true, false);
         telemetry.addData("Diagnostic Vuforia Mode ", " Initialized");
     }
 

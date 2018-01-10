@@ -42,7 +42,7 @@ public class SimpleVuforia {
      * Creates a Vuforia localizer and starts localization.
      * @param vuforiaLicenseKey The license key to access Vuforia code.
      */
-    public SimpleVuforia(String vuforiaLicenseKey, RobotHardware opMode, boolean useCameraMonitor) {
+    public SimpleVuforia(String vuforiaLicenseKey, RobotHardware opMode, boolean useCameraMonitor, boolean useBackCamera) {
         this.opMode = opMode;
         VuforiaLocalizer.Parameters parameters;
         if (useCameraMonitor) {
@@ -53,8 +53,11 @@ public class SimpleVuforia {
             parameters = new VuforiaLocalizer.Parameters();
         }
         parameters.vuforiaLicenseKey = vuforiaLicenseKey;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-
+        if (useBackCamera) {
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        } else {
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        }
         vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         relicTrackables = vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
