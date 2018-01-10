@@ -191,7 +191,7 @@ public class MecanumNavigation {
 
         public String toString() {
             DecimalFormat df = new DecimalFormat("0.00");
-            return df.format(x) + " , " + df.format(y) + " , " + df.format(theta);
+            return df.format(x) + " , " + df.format(y) + " , " + df.format(theta*180/Math.PI) + " deg";
         }
     }
 

@@ -30,6 +30,7 @@ public class Manual extends RobotHardware {
     private boolean slow_mode = false;
     private ClawState clawState = ClawState.CLAW_STOWED;
     private boolean fastMode = false;
+    private MecanumNavigation.Navigation2D pickupPosition = new MecanumNavigation.Navigation2D(0,0,0);
 
     // Variables for the claw states.
     private enum ClawState {
@@ -80,8 +81,17 @@ public class Manual extends RobotHardware {
             clawTestControls();
 
             // Reset navigation position to zero.
-            if (controller.YOnce()) {
+            if (controller.YOnce() || controller.dpadUpOnce()) {
                 mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0, 0, 0));
+            }
+            if (controller.dpadDownOnce()) { // Set current position to pickup position
+                pickupPosition = (MecanumNavigation.Navigation2D) mecanumNavigation.currentPosition.clone();
+            }
+            if (controller.dpadLeftOnce()) {
+                mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0,6.5,0));
+            }
+            if (controller.dpadRightOnce()) {
+                mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0,-6.5,0));
             }
             // Test autoDrive
             if (controller.X()) {
@@ -89,7 +99,7 @@ public class Manual extends RobotHardware {
             }
             // Test autoDrive
             if (controller.B()) {  // Removed 'once' trigger.
-                driveToPosition(mecanumNavigation, new MecanumNavigation.Navigation2D(0,0,0), 1);
+                autoDrive.driveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
             // Full power mode
             if (controller.AOnce()) {
@@ -106,6 +116,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Fast", fastMode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
+            telemetry.addData("pickupPosition",pickupPosition.toString());
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -132,12 +143,27 @@ public class Manual extends RobotHardware {
             max_rate = 1.0;
         }
         double exponential = exponential_input ? 3 : 1;
-        setDriveForSimpleMecanum(
-                sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
-                sign * max_rate * Math.pow(gamepad1.left_stick_y, exponential),
-                max_rate * Math.pow(gamepad1.right_stick_x, exponential),
-                max_rate * Math.pow(gamepad1.right_stick_y, exponential));
-
+        // Manual control with sticks, auto drive with dpad.
+        if (!controller.dpadUp() && !controller.dpadDown() && !controller.dpadLeft() && !controller.dpadRight()) {
+            setDriveForSimpleMecanum(
+                    sign * max_rate * Math.pow(gamepad1.left_stick_x, exponential),
+                    sign * max_rate * Math.pow(gamepad1.left_stick_y, exponential),
+                    max_rate * Math.pow(gamepad1.right_stick_x, exponential),
+                    max_rate * Math.pow(gamepad1.right_stick_y, exponential));
+        } else { // Auto driving controls on dpad.
+            if (controller.dpadUp()) {
+                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,0),1);
+            }
+            if (controller.dpadLeft()) {
+                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,6.5,0),1);
+            }
+            if (controller.dpadRight()) {
+                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,-6.5,0),1);
+            }
+            if (controller.dpadDown()) {
+                autoDrive.rotateThenDriveToPosition((MecanumNavigation.Navigation2D)pickupPosition.clone(),1);
+            }
+        }
 
         // Arm controls
         double left_trigger = gamepad1.left_trigger; // Arm Dowm
