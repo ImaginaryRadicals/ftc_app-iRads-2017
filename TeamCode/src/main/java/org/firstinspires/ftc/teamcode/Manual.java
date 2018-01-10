@@ -27,7 +27,6 @@ public class Manual extends RobotHardware {
     private boolean use_telemetry = true;
     private boolean forward_drive = true;
     private boolean exponential_input = true;
-    private boolean analog_arm_control = true;
     private boolean slow_mode = false;
     private ClawState clawState = ClawState.CLAW_STOWED;
     private boolean fastMode = false;
@@ -78,7 +77,6 @@ public class Manual extends RobotHardware {
                 stopAllMotors(); // Safety first! (Otherwise motors can run uncontrolled.)
             }
             jewelArmTesting();
-            jewelServoRateTesting();
             clawTestControls();
 
             // Reset navigation position to zero.
@@ -104,12 +102,10 @@ public class Manual extends RobotHardware {
 
 
         if (use_telemetry) {
-            telemetry.addData("Exponential", exponential_input);
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Fast", fastMode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
-            telemetry.addData("Jewel Target Position", df.format(getAngle(ServoName.JEWEL_ARM)));
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -144,28 +140,17 @@ public class Manual extends RobotHardware {
 
 
         // Arm controls
-        if (analog_arm_control) {
-            // Arm Control Analog
-            double left_trigger = gamepad1.left_trigger; // Arm Dowm
-            double right_trigger = gamepad1.right_trigger; // Arm Up
+        double left_trigger = gamepad1.left_trigger; // Arm Dowm
+        double right_trigger = gamepad1.right_trigger; // Arm Up
 
-            if (left_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45 * left_trigger));
-            } else if (right_trigger > 0.1) {
-                setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45 * right_trigger));
-            } else {
-                setPower(MotorName.ARM_MOTOR, 0);
-            }
+        if (left_trigger > 0.1) {
+            setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45 * left_trigger));
+        } else if (right_trigger > 0.1) {
+            setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45 * right_trigger));
         } else {
-            // Arm Control Buttons
-            if (gamepad1.dpad_up) {
-                setPower(MotorName.ARM_MOTOR, sign * Constants.RAISE_ARM_SPEED);
-            } else if (gamepad1.dpad_down) {
-                setPower(MotorName.ARM_MOTOR, sign * Constants.LOWER_ARM_SPEED);
-            } else {
-                setPower(MotorName.ARM_MOTOR, 0.0);
-            }
+            setPower(MotorName.ARM_MOTOR, 0);
         }
+
 
         clawStateMachine();
 
@@ -228,13 +213,5 @@ public class Manual extends RobotHardware {
         setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
     }
 
-    private void jewelServoRateTesting() {
-        // Alternative Jewel Arm Control Demo
-        if (analog_arm_control && controller.dpadDown()) {
-            moveServoAtRate(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM, 0.4);
-        } else if (analog_arm_control && controller.dpadUp()) {
-            moveServoAtRate(ServoName.JEWEL_ARM, Constants.JEWEL_ARM_INITIAL, 0.4);
-        }
-    }
 
 }
