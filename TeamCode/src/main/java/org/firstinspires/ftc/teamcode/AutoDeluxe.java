@@ -82,7 +82,7 @@ public class AutoDeluxe extends RobotHardware {
                         getEncoderValue(MotorName.DRIVE_BACK_RIGHT)));
         autoDrive = new AutoDrive(this, mecanumNavigation);
         // Finally, construct the state machine.
-        autoDeluxeStateMachine = new AutoDeluxeStateMachine(this, vuforia, robotColor, robotStartPos);
+        autoDeluxeStateMachine = new AutoDeluxeStateMachine(this, robotColor, robotStartPos);
         telemetry.addData("Initialization:", "Successful!");
     }
 

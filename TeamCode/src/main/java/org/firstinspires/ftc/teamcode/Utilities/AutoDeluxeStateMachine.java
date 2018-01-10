@@ -31,7 +31,6 @@ public class AutoDeluxeStateMachine {
 
     public AutoState state = AutoState.STATE_START;
     private AutoDeluxe opMode;
-    private SimpleVuforia vuforia;
     private ElapsedTime stateLoopTimer = new ElapsedTime();
     private double lastStateLoopPeriod = 0;
     private ElapsedTime stateTimer = new ElapsedTime();
@@ -39,7 +38,6 @@ public class AutoDeluxeStateMachine {
     // Colors
     public Color.Ftc teamColor = Color.Ftc.UNKNOWN;
     public Color.Ftc jewelColor = Color.Ftc.UNKNOWN;
-    public RelicRecoveryVuMark vuMarkPosition;
 
     // Kinematics
     private double timeHitJewel = 0.5;
@@ -69,9 +67,8 @@ public class AutoDeluxeStateMachine {
             new MecanumNavigation.Navigation2D(0,0, degreesToRadians(360))));
 
 
-    public AutoDeluxeStateMachine(AutoDeluxe opMode, SimpleVuforia vuforia, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
+    public AutoDeluxeStateMachine(AutoDeluxe opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
         this.opMode = opMode;
-        this.vuforia = vuforia;
         this.teamColor = teamColor;
         this.startPosition = startPosition;
     }
@@ -220,12 +217,6 @@ public class AutoDeluxeStateMachine {
     private void setJewelColor(Color.Ftc detectedJewelColor) {
         if ( detectedJewelColor != Color.Ftc.UNKNOWN) {
             this.jewelColor = detectedJewelColor;
-        }
-    }
-
-    private void setVumark(RelicRecoveryVuMark detectedVuMark) {
-        if ( detectedVuMark != RelicRecoveryVuMark.UNKNOWN) {
-            this.vuMarkPosition = detectedVuMark;
         }
     }
 
