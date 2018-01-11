@@ -87,7 +87,7 @@ public class MecanumNavigation {
         double deltaTheta = targetPosition.theta - currentPosition.theta;
 
         double bodyX = deltaX * Math.cos(currentPosition.theta) + deltaY * Math.sin(currentPosition.theta);
-        double bodyY = deltaX * Math.cos(currentPosition.theta) + deltaX * Math.sin(currentPosition.theta);
+        double bodyY = -deltaX * Math.sin(currentPosition.theta) + deltaY * Math.cos(currentPosition.theta);
         double bodyTheta = deltaTheta;
 
         return deltaWheelsFromBodyRelativeMotion(new Navigation2D(bodyX, bodyY, bodyTheta));
