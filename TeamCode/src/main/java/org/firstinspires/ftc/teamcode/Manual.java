@@ -96,11 +96,11 @@ public class Manual extends RobotHardware {
             }
             // Test autoDrive
             if (controller.X()) {
-                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
+                autoDrive.driveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
             }
             // Test autoDrive
             if (controller.B()) {  // Removed 'once' trigger.
-                autoDrive.driveToPosition(new MecanumNavigation.Navigation2D(0,0,0), 1);
+                autoDrive.driveToPosition(pickupPosition, 1);
             }
             // Full power mode
             if (controller.AOnce()) {

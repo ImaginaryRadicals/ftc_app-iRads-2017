@@ -45,6 +45,7 @@ public class AutoDeluxeStateMachine {
     public RobotHardware.StartPosition startPosition;
     private int initialArmEncoderTicks = 0;
     private int currentDriveWaypoint = 0;
+    private double driveRate = 0.5;
 
     // Motions for each starting position
     private ArrayList<MecanumNavigation.Navigation2D> blueCornerWaypoints = new ArrayList<>(Arrays.asList(
@@ -60,9 +61,9 @@ public class AutoDeluxeStateMachine {
 //            new MecanumNavigation.Navigation2D(-36,0,degreesToRadians(0)),
 //            new MecanumNavigation.Navigation2D(-36,12,degreesToRadians(90))));
     private ArrayList<MecanumNavigation.Navigation2D> redCenterWaypoints = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(12,0, degreesToRadians(0)),
-            new MecanumNavigation.Navigation2D(12,12, degreesToRadians(90)),
-            new MecanumNavigation.Navigation2D(0,12, degreesToRadians(180)),
+            new MecanumNavigation.Navigation2D(24,0, degreesToRadians(0)),
+            new MecanumNavigation.Navigation2D(24,24, degreesToRadians(90)),
+            new MecanumNavigation.Navigation2D(0,24, degreesToRadians(180)),
             new MecanumNavigation.Navigation2D(0,0, degreesToRadians(270)),
             new MecanumNavigation.Navigation2D(0,0, degreesToRadians(360))));
 
@@ -180,7 +181,7 @@ public class AutoDeluxeStateMachine {
                 // Show Target Status and debug info
                 opMode.telemetry.addData("Current Waypoint: ", currentDriveWaypoint);
                 opMode.telemetry.addData("Target", waypointArray.get(currentDriveWaypoint).toString());
-                arrivedAtWaypoint = opMode.autoDrive.rotateThenDriveToPosition(waypointArray.get(currentDriveWaypoint),0.5);
+                arrivedAtWaypoint = opMode.autoDrive.rotateThenDriveToPosition(waypointArray.get(currentDriveWaypoint),driveRate);
             }
             if ( arrivedAtWaypoint) {
                 ++currentDriveWaypoint;
