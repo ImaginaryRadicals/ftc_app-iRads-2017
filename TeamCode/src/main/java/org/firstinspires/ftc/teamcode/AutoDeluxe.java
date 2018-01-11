@@ -74,7 +74,8 @@ public class AutoDeluxe extends RobotHardware {
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
-                        Constants.DRIVE_WHEEL_DIAMETER_INCHES, Constants.DRIVE_WHEEL_STEPS_PER_ROT));
+                        Constants.DRIVE_WHEEL_DIAMETER_INCHES, Constants.DRIVE_WHEEL_STEPS_PER_ROT,
+                        Constants.DRIVE_WHEEL_LATERAL_RATIO));
         mecanumNavigation.initialize(new MecanumNavigation.Navigation2D(0, 0, 0),
                 new MecanumNavigation.WheelTicks(getEncoderValue(MotorName.DRIVE_FRONT_LEFT),
                         getEncoderValue(MotorName.DRIVE_FRONT_RIGHT),

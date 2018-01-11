@@ -239,6 +239,15 @@ public class MecanumNavigation {
             this.encoderTicksPerRotation = encoderTicksPerRotation;
         }
 
+        public DriveTrainMecanum(double wheelbaseLength, double wheelbaseWidth,
+                                 double wheelDiameter, int encoderTicksPerRotation, double lateralScaling) {
+            this.wheelbaseLength = wheelbaseLength;
+            this.wheelbaseWidth = wheelbaseWidth;
+            this.wheelDiameter = wheelDiameter;
+            this.encoderTicksPerRotation = encoderTicksPerRotation;
+            this.lateralScaling = lateralScaling;
+        }
+
         public double getK() {
             return Math.abs(wheelbaseLength/2) + Math.abs(wheelbaseWidth/2);
         }
