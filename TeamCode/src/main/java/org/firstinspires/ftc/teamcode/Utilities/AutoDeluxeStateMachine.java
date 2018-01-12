@@ -51,6 +51,7 @@ public class AutoDeluxeStateMachine {
     private int initialArmEncoderTicks = 0;
     private int currentDriveWaypoint = 0;
     private double driveRate = 0.5;
+    private double armLiftHeight = 900;
 
     // Motions for each starting position
     private ArrayList<MecanumNavigation.Navigation2D> blueCornerWaypoints = new ArrayList<>(Arrays.asList(
@@ -101,7 +102,7 @@ public class AutoDeluxeStateMachine {
 
             // Wait 1 second before lifting arm.
             if(stateTimer.seconds() > 1) {
-                if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < initialArmEncoderTicks + 500) {
+                if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < initialArmEncoderTicks + armLiftHeight) {
                     opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
                 } else {
                     opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
@@ -109,6 +110,7 @@ public class AutoDeluxeStateMachine {
             }
             // Give jewel arm 2.5 seconds to settle, then detect the color.
             if(stateTimer.seconds() > 2) {
+                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
                 state = AutoState.STATE_DETECT_COLOR;
                 stateTimer.reset();
             }
@@ -232,6 +234,7 @@ public class AutoDeluxeStateMachine {
         double insertCorner = 12;
         double insertCenter = 12;
 
+        // Calculate trueSkew, skew with the appropriate sign.
         double trueSkewAngleRadiansCCW = 0;
         if (teamColor == Color.Ftc.BLUE) {
             if (startPosition == RobotHardware.StartPosition.FIELD_CENTER && opMode.glyphPositionVuMark == RelicRecoveryVuMark.RIGHT) {
@@ -254,28 +257,38 @@ public class AutoDeluxeStateMachine {
         // Select Driving waypoints
         if (teamColor == Color.Ftc.BLUE) {
             if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
-                // Blue Corner
+                /** Blue Corner */
                 waypointArray = new ArrayList<>(Arrays.asList(
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,0, degreesToRadians(0)),    // DISMOUNT
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // ALIGN_W_OFFSETS
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // APPROACH NULL
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW), // ROTATE
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance + insertCorner + rotationInsertionCorrection,-alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW) // INSERT
+                    // DISMOUNT
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance,
+                            0, degreesToRadians(0)),
+                    // ALIGN_W_OFFSETS
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance,
+                            -alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)),
+                    // APPROACH (NULL)
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + approachCorner,
+                            -alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)),
+                    // ROTATE
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance,
+                            -alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW),
+                    // INSERT
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + insertCorner + rotationInsertionCorrection,
+                            -alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW)
                 ));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
-                // Blue Center
+                /** Blue Center */
                 waypointArray = new ArrayList<>(Arrays.asList(
                         new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
                         new MecanumNavigation.Navigation2D(36,12, degreesToRadians(90))));
             }
         } else if (teamColor == Color.Ftc.RED) {
             if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
-                // Red Corner
+                /** Red Corner */
                 waypointArray = new ArrayList<>(Arrays.asList(
                         new MecanumNavigation.Navigation2D(-36,0, degreesToRadians(0)),
                         new MecanumNavigation.Navigation2D(-36,-12, degreesToRadians(180))));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
-                // Red Center
+                /** Red Center */
                 waypointArray = new ArrayList<>(Arrays.asList(
                         new MecanumNavigation.Navigation2D(-36,0,degreesToRadians(0)),
                         new MecanumNavigation.Navigation2D(-36,12,degreesToRadians(90))));
