@@ -24,7 +24,12 @@ public class AutoDeluxeStateMachine {
         STATE_HIT_DETECTED_JEWEL_CW,
         STATE_HIT_OTHER_JEWEL_CCW,
         STATE_ABORT_JEWEL,
+        STATE_PROCESS_VUMARK,
         STATE_DRIVE_TO_GLYPH_BOX,
+        STATE_DISMOUNT,
+        STATE_ALIGN_W_OFFSETS,
+        STATE_APPROACH_GLYPH_BOX,
+        STATE_ROTATE_AND_INSERT_GLYPH,
         STATE_LOWER_GLYPH_ARM,
         STATE_STOP,
     }
@@ -157,24 +162,7 @@ public class AutoDeluxeStateMachine {
             // Added to ensure array is initialized.
             waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
 
-            // Select Driving waypoints
-            if (teamColor == Color.Ftc.BLUE) {
-                if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
-                    waypointArray = blueCornerWaypoints;
-                } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
-                    waypointArray = blueCenterWaypoints;
-                }
-            } else if (teamColor == Color.Ftc.RED) {
-                if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
-                    waypointArray = redCornerWaypoints;
-                } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
-                    waypointArray = redCenterWaypoints;
-                }
-            } else {
-                opMode.stopAllMotors();
-                stateTimer.reset();
-                state = AutoState.STATE_STOP;
-            }
+            waypointArray = generateWaypoints(teamColor,startPosition, opMode.glyphPositionVuMark, degreesToRadians(30));
 
             // Do the driving
             if(currentDriveWaypoint < waypointArray.size() ) {
@@ -230,6 +218,97 @@ public class AutoDeluxeStateMachine {
     }
 
 
+    private ArrayList<MecanumNavigation.Navigation2D>
+            generateWaypoints(Color.Ftc teamColor, RobotHardware.StartPosition startPosition,
+                                RelicRecoveryVuMark positionVumark, double insertionSkewRadiansCCW) {
+        ArrayList<MecanumNavigation.Navigation2D> waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
 
+        double dismountBlueDistance = 20;
+        double dismountRedDistance = 20;
+        double alignmentStrafeCorner = 12;
+        double alignmentDriveCenter = 32;
+        double approachCorner = 0;
+        double approachCenter = 0;
+        double insertCorner = 12;
+        double insertCenter = 12;
+
+        double trueSkewAngleRadiansCCW = 0;
+        if (teamColor == Color.Ftc.BLUE) {
+            if (startPosition == RobotHardware.StartPosition.FIELD_CENTER && opMode.glyphPositionVuMark == RelicRecoveryVuMark.RIGHT) {
+                trueSkewAngleRadiansCCW = -1 * Math.abs(insertionSkewRadiansCCW);
+            } else {
+                trueSkewAngleRadiansCCW = Math.abs(insertionSkewRadiansCCW);
+            }
+        } else if(teamColor == Color.Ftc.RED) {
+            if (startPosition == RobotHardware.StartPosition.FIELD_CENTER && opMode.glyphPositionVuMark == RelicRecoveryVuMark.LEFT) {
+                trueSkewAngleRadiansCCW = Math.abs(insertionSkewRadiansCCW);
+            } else {
+                trueSkewAngleRadiansCCW = -1 * Math.abs(insertionSkewRadiansCCW);
+            }
+        }
+
+        double alignmentOffsetRightTotal = getGlyphboxOffsetTowardRight(opMode.glyphPositionVuMark, trueSkewAngleRadiansCCW);
+
+
+        // Select Driving waypoints
+        if (teamColor == Color.Ftc.BLUE) {
+            if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
+                // Blue Corner
+                waypointArray = new ArrayList<>(Arrays.asList(
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,0, degreesToRadians(0)),    // DISMOUNT
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // ALIGN_W_OFFSETS
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // APPROACH NULL
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(trueSkewAngleRadiansCCW)), // ROTATE
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(trueSkewAngleRadiansCCW)) // ROTATE
+                ));
+            } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
+                // Blue Center
+                waypointArray = new ArrayList<>(Arrays.asList(
+                        new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
+                        new MecanumNavigation.Navigation2D(36,12, degreesToRadians(90))));
+            }
+        } else if (teamColor == Color.Ftc.RED) {
+            if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
+                // Red Corner
+                waypointArray = new ArrayList<>(Arrays.asList(
+                        new MecanumNavigation.Navigation2D(-36,0, degreesToRadians(0)),
+                        new MecanumNavigation.Navigation2D(-36,-12, degreesToRadians(180))));
+            } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
+                // Red Center
+                waypointArray = new ArrayList<>(Arrays.asList(
+                        new MecanumNavigation.Navigation2D(-36,0,degreesToRadians(0)),
+                        new MecanumNavigation.Navigation2D(-36,12,degreesToRadians(90))));
+            }
+        } else {
+            opMode.stopAllMotors();
+            stateTimer.reset();
+            state = AutoState.STATE_STOP;
+        }
+
+        return waypointArray;
+    }
+
+
+
+
+    private MecanumNavigation.Navigation2D getGlyphOffsetFromRotation(double rotationRadians) {
+        double distanceToGlyphCenter = 12;
+        return new MecanumNavigation.Navigation2D( distanceToGlyphCenter * ( Math.cos(rotationRadians) - 1), distanceToGlyphCenter * Math.sin(rotationRadians), rotationRadians);
+    }
+
+
+    private double getGlyphboxOffsetTowardRight( RelicRecoveryVuMark vumarkPosition, double skewAngleRadiansCCW) {
+        MecanumNavigation.Navigation2D glyphOffsetFromRotation = getGlyphOffsetFromRotation(skewAngleRadiansCCW);
+        double columnWidth = 6.5;
+        double offsetRightTotal = 0;
+        if (vumarkPosition == RelicRecoveryVuMark.LEFT) {
+            offsetRightTotal -= columnWidth;
+        } else if (vumarkPosition == RelicRecoveryVuMark.RIGHT) {
+            offsetRightTotal += columnWidth;
+        }
+        offsetRightTotal += glyphOffsetFromRotation.y;
+
+        return offsetRightTotal;
+    }
 
 }
