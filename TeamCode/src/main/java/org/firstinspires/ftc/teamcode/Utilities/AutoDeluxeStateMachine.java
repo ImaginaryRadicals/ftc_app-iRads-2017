@@ -306,8 +306,8 @@ public class AutoDeluxeStateMachine {
                     new MecanumNavigation.Navigation2D(-dismountRedDistance,
                             -alignmentStrafeCorner + alignmentOffsetRightTotal, degreesToRadians(0)),
                     // APPROACH (NULL)
-                    new MecanumNavigation.Navigation2D(-dismountRedDistance - approachCorner,
-                            -alignmentStrafeCorner + alignmentOffsetRightTotal, degreesToRadians(0)),
+                        new MecanumNavigation.Navigation2D(-dismountRedDistance,
+                                -alignmentStrafeCorner + alignmentOffsetRightTotal, degreesToRadians(0)),
                     // ROTATE
                     new MecanumNavigation.Navigation2D(-dismountRedDistance,
                             -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180)),
