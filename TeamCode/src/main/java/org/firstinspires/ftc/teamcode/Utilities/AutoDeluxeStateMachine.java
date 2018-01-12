@@ -285,8 +285,22 @@ public class AutoDeluxeStateMachine {
             if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
                 /** Red Corner */
                 waypointArray = new ArrayList<>(Arrays.asList(
-                        new MecanumNavigation.Navigation2D(-36,0, degreesToRadians(0)),
-                        new MecanumNavigation.Navigation2D(-36,-12, degreesToRadians(180))));
+                    // DISMOUNT
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance,
+                            0, degreesToRadians(0)),
+                    // ALIGN_W_OFFSETS
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance,
+                            -alignmentStrafeCorner + alignmentOffsetRightTotal, degreesToRadians(0)),
+                    // APPROACH (NULL)
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance - approachCorner,
+                            -alignmentStrafeCorner + alignmentOffsetRightTotal, degreesToRadians(0)),
+                    // ROTATE
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance,
+                            -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180)),
+                    // INSERT
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance - insertCorner - rotationInsertionCorrection,
+                            -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180))
+                ));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
                 /** Red Center */
                 waypointArray = new ArrayList<>(Arrays.asList(
