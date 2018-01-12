@@ -278,8 +278,22 @@ public class AutoDeluxeStateMachine {
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
                 /** Blue Center */
                 waypointArray = new ArrayList<>(Arrays.asList(
-                        new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
-                        new MecanumNavigation.Navigation2D(36,12, degreesToRadians(90))));
+                    // DISMOUNT
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance,
+                            0, degreesToRadians(0)),
+                    // ALIGN_W_OFFSETS
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                             0, degreesToRadians(0)),
+                    // APPROACH (NULL)
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + approachCorner,
+                            alignmentDriveCenter + alignmentOffsetRightTotal, degreesToRadians(0)),
+                    // ROTATE
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                            0 , trueSkewAngleRadiansCCW + degreesToRadians(90)),
+                    // INSERT
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                            insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90))
+                ));
             }
         } else if (teamColor == Color.Ftc.RED) {
             if (startPosition == RobotHardware.StartPosition.FIELD_CORNER) {
