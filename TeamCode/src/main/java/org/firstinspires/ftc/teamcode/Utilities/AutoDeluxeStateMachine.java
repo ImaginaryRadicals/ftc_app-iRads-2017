@@ -248,6 +248,7 @@ public class AutoDeluxeStateMachine {
         }
 
         double alignmentOffsetRightTotal = getGlyphboxOffsetTowardRight(opMode.glyphPositionVuMark, trueSkewAngleRadiansCCW);
+        double rotationInsertionCorrection = -getGlyphOffsetFromRotation(trueSkewAngleRadiansCCW).x;
 
 
         // Select Driving waypoints
@@ -258,8 +259,8 @@ public class AutoDeluxeStateMachine {
                         new MecanumNavigation.Navigation2D(dismountBlueDistance,0, degreesToRadians(0)),    // DISMOUNT
                         new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // ALIGN_W_OFFSETS
                         new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(0)), // APPROACH NULL
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(trueSkewAngleRadiansCCW)), // ROTATE
-                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, degreesToRadians(trueSkewAngleRadiansCCW)) // ROTATE
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance,-alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW), // ROTATE
+                        new MecanumNavigation.Navigation2D(dismountBlueDistance + insertCorner + rotationInsertionCorrection,-alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW) // INSERT
                 ));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
                 // Blue Center
@@ -292,11 +293,17 @@ public class AutoDeluxeStateMachine {
 
 
     private MecanumNavigation.Navigation2D getGlyphOffsetFromRotation(double rotationRadians) {
-        double distanceToGlyphCenter = 12;
+        double distanceToGlyphCenter = 12+3; // Added half of glyph width to lever arm.
         return new MecanumNavigation.Navigation2D( distanceToGlyphCenter * ( Math.cos(rotationRadians) - 1), distanceToGlyphCenter * Math.sin(rotationRadians), rotationRadians);
     }
 
-
+    /**
+     * Get the number of inches the robot needs to slide toward the right Cryptobox column
+     * in order to line the glyph up with the desired column, at the desired skew angle.
+     * @param vumarkPosition
+     * @param skewAngleRadiansCCW
+     * @return
+     */
     private double getGlyphboxOffsetTowardRight( RelicRecoveryVuMark vumarkPosition, double skewAngleRadiansCCW) {
         MecanumNavigation.Navigation2D glyphOffsetFromRotation = getGlyphOffsetFromRotation(skewAngleRadiansCCW);
         double columnWidth = 6.5;
