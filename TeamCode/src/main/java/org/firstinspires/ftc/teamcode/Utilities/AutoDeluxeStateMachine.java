@@ -51,7 +51,7 @@ public class AutoDeluxeStateMachine {
     private int initialArmEncoderTicks = 0;
     private int currentDriveWaypoint = 0;
     private double driveRate = 0.5;
-    private double armLiftHeight = 900;
+    private double armLiftHeight = 700;
 
     // Motions for each starting position
     private ArrayList<MecanumNavigation.Navigation2D> blueCornerWaypoints = new ArrayList<>(Arrays.asList(
@@ -228,7 +228,7 @@ public class AutoDeluxeStateMachine {
         double dismountBlueDistance = 24;
         double dismountRedDistance = 25;
         double alignmentStrafeCorner = 12;
-        double alignmentDriveCenter = 22 - 6;
+        double alignmentDriveCenter = 22 - 6 + 2 - 6.25;
         double approachCorner = 0;
         double approachCenter = 0;
         double insertCorner = 12;
@@ -282,16 +282,16 @@ public class AutoDeluxeStateMachine {
                     new MecanumNavigation.Navigation2D(dismountBlueDistance,
                             0, degreesToRadians(0)),
                     // ALIGN_W_OFFSETS
-                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
                              0, degreesToRadians(0)),
                     // APPROACH (NULL)
-                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
                             0, degreesToRadians(0)),
                     // ROTATE
-                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
                             0 , trueSkewAngleRadiansCCW + degreesToRadians(90)),
                     // INSERT
-                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter,
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
                             insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90))
                 ));
             }
