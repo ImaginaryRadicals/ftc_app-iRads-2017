@@ -348,7 +348,7 @@ public class AutoDeluxeStateMachine {
 
 
     private MecanumNavigation.Navigation2D getGlyphOffsetFromRotation(double rotationRadians) {
-        double distanceToGlyphCenter = 12+6; // Added half of glyph width to lever arm.
+        double distanceToGlyphCenter = 12+6-7+1.5; // Added half of glyph width to lever arm.
         return new MecanumNavigation.Navigation2D( distanceToGlyphCenter * ( Math.cos(rotationRadians) - 1), distanceToGlyphCenter * Math.sin(rotationRadians), rotationRadians);
     }
 
