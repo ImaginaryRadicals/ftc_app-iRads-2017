@@ -216,7 +216,7 @@ public class AutoDeluxeStateMachine {
             }
         } else if (state == AutoState.STATE_BACKUP) {
             boolean arrivedAtWaypoint = false;
-            arrivedAtWaypoint = driveToWaypointAtRate(waypointArrayGlobal.size()-1,driveRate);
+            arrivedAtWaypoint = driveToWaypointAtRate(5,driveRate);
 
             // Open both claws
             opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
@@ -268,6 +268,7 @@ public class AutoDeluxeStateMachine {
         double approachCenter = 0;
         double insertCorner = 12;
         double insertCenter = 12;
+        double backupDistance = 1;
 
         // Calculate trueSkew, skew with the appropriate sign.
         double trueSkewAngleRadiansCCW = 0;
@@ -308,6 +309,9 @@ public class AutoDeluxeStateMachine {
                             -alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW),
                     // INSERT
                     new MecanumNavigation.Navigation2D(dismountBlueDistance + insertCorner + rotationInsertionCorrection,
+                            -alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW),
+                    // BACKUP
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + insertCorner + rotationInsertionCorrection - backupDistance,
                             -alignmentStrafeCorner - alignmentOffsetRightTotal, trueSkewAngleRadiansCCW)
                 ));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
@@ -327,7 +331,10 @@ public class AutoDeluxeStateMachine {
                             0 , trueSkewAngleRadiansCCW + degreesToRadians(90)),
                     // INSERT
                     new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
-                            insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90))
+                            insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90)),
+                    // BACKUP
+                    new MecanumNavigation.Navigation2D(dismountBlueDistance + alignmentDriveCenter + alignmentOffsetRightTotal,
+                            insertCenter + rotationInsertionCorrection - backupDistance, trueSkewAngleRadiansCCW + degreesToRadians(90))
                 ));
             }
         } else if (teamColor == Color.Ftc.RED) {
@@ -348,6 +355,9 @@ public class AutoDeluxeStateMachine {
                             -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180)),
                     // INSERT
                     new MecanumNavigation.Navigation2D(-dismountRedDistance - insertCorner - rotationInsertionCorrection,
+                            -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180)),
+                    // BACKUP
+                    new MecanumNavigation.Navigation2D(-dismountRedDistance - insertCorner - rotationInsertionCorrection + backupDistance,
                             -alignmentStrafeCorner + alignmentOffsetRightTotal, trueSkewAngleRadiansCCW + degreesToRadians(180))
                 ));
             } else if (startPosition == RobotHardware.StartPosition.FIELD_CENTER) {
@@ -367,7 +377,10 @@ public class AutoDeluxeStateMachine {
                                 0 , trueSkewAngleRadiansCCW + degreesToRadians(90)),
                         // INSERT
                         new MecanumNavigation.Navigation2D(-dismountRedDistance + -alignmentDriveCenter + alignmentOffsetRightTotal,
-                                insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90))
+                                insertCenter + rotationInsertionCorrection, trueSkewAngleRadiansCCW + degreesToRadians(90)),
+                        // BACKUP
+                        new MecanumNavigation.Navigation2D(-dismountRedDistance + -alignmentDriveCenter + alignmentOffsetRightTotal,
+                                insertCenter + rotationInsertionCorrection - backupDistance, trueSkewAngleRadiansCCW + degreesToRadians(90))
                 ));
             }
         } else {
