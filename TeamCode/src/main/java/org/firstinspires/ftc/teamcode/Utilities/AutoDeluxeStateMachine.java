@@ -19,18 +19,18 @@ public class AutoDeluxeStateMachine {
 
     public enum AutoState {
         STATE_START,
-        STATE_LOWER_ARM,
+        STATE_LOWER_JEWEL_ARM_AND_LIFT_CLAW,
         STATE_DETECT_COLOR,
         STATE_HIT_DETECTED_JEWEL_CW,
         STATE_HIT_OTHER_JEWEL_CCW,
         STATE_ABORT_JEWEL,
-        STATE_PROCESS_VUMARK,
-        STATE_DRIVE_TO_GLYPH_BOX,
+        STATE_FIND_VUMARK_AND_GENERATE_WAYPOINTS,
         STATE_DISMOUNT,
         STATE_ALIGN_W_OFFSETS,
         STATE_APPROACH_GLYPH_BOX,
-        STATE_ROTATE_AND_INSERT_GLYPH,
-        STATE_LOWER_GLYPH_ARM,
+        STATE_ROTATE_BEFORE_INSERT_THEN_OPEN_CLAW, // lower arm and open claw
+        STATE_INSERT_GLYPH,
+        STATE_BACKUP,
         STATE_STOP,
     }
 
@@ -45,6 +45,7 @@ public class AutoDeluxeStateMachine {
     public Color.Ftc jewelColor = Color.Ftc.UNKNOWN;
 
     // Kinematics
+    private ArrayList<MecanumNavigation.Navigation2D> waypointArrayGlobal;
     private double timeHitJewel = 0.5;
     private double powerHitJewel = 0.2;
     public RobotHardware.StartPosition startPosition;
@@ -52,26 +53,6 @@ public class AutoDeluxeStateMachine {
     private int currentDriveWaypoint = 0;
     private double driveRate = 0.5;
     private double armLiftHeight = 700;
-
-    // Motions for each starting position
-    private ArrayList<MecanumNavigation.Navigation2D> blueCornerWaypoints = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
-            new MecanumNavigation.Navigation2D(36,12, degreesToRadians(0))));
-    private ArrayList<MecanumNavigation.Navigation2D> blueCenterWaypoints = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(36,0, degreesToRadians(0)),
-            new MecanumNavigation.Navigation2D(36,12, degreesToRadians(90))));
-    private ArrayList<MecanumNavigation.Navigation2D> redCornerWaypoints = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(-36,0, degreesToRadians(0)),
-            new MecanumNavigation.Navigation2D(-36,-12, degreesToRadians(180))));
-//    private ArrayList<MecanumNavigation.Navigation2D> redCenterWaypoints = new ArrayList<>(Arrays.asList(
-//            new MecanumNavigation.Navigation2D(-36,0,degreesToRadians(0)),
-//            new MecanumNavigation.Navigation2D(-36,12,degreesToRadians(90))));
-    private ArrayList<MecanumNavigation.Navigation2D> redCenterWaypoints = new ArrayList<>(Arrays.asList(
-            new MecanumNavigation.Navigation2D(24,0, degreesToRadians(0)),
-            new MecanumNavigation.Navigation2D(24,24, degreesToRadians(90)),
-            new MecanumNavigation.Navigation2D(0,24, degreesToRadians(180)),
-            new MecanumNavigation.Navigation2D(0,0, degreesToRadians(270)),
-            new MecanumNavigation.Navigation2D(0,0, degreesToRadians(360))));
 
 
     public AutoDeluxeStateMachine(AutoDeluxe opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
@@ -95,8 +76,8 @@ public class AutoDeluxeStateMachine {
         if (state == AutoState.STATE_START) {
             initialArmEncoderTicks = opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR);
             stateTimer.reset();
-            state = AutoState.STATE_LOWER_ARM;
-        } else if (state == AutoState.STATE_LOWER_ARM) {
+            state = AutoState.STATE_LOWER_JEWEL_ARM_AND_LIFT_CLAW;
+        } else if (state == AutoState.STATE_LOWER_JEWEL_ARM_AND_LIFT_CLAW) {
             opMode.closeClaw();
             opMode.moveServoAtRate(RobotHardware.ServoName.JEWEL_ARM, Constants.JEWEL_ARM_BOTTOM,0.7);
 
@@ -138,7 +119,7 @@ public class AutoDeluxeStateMachine {
             } else {
                 opMode.stopAllMotors();
                 stateTimer.reset();
-                state = AutoState.STATE_DRIVE_TO_GLYPH_BOX;
+                state = AutoState.STATE_FIND_VUMARK_AND_GENERATE_WAYPOINTS;
             }
         } else if (state == AutoState.STATE_HIT_OTHER_JEWEL_CCW) {
             if(stateTimer.seconds() < timeHitJewel) {
@@ -149,51 +130,103 @@ public class AutoDeluxeStateMachine {
             } else {
                 opMode.stopAllMotors();
                 stateTimer.reset();
-                state = AutoState.STATE_DRIVE_TO_GLYPH_BOX;
+                state = AutoState.STATE_FIND_VUMARK_AND_GENERATE_WAYPOINTS;
             }
 
         } else if (state == AutoState.STATE_ABORT_JEWEL) {
             opMode.armServoTop();
             if (stateTimer.seconds() > 1) {
-                state = AutoState.STATE_DRIVE_TO_GLYPH_BOX;
+                state = AutoState.STATE_FIND_VUMARK_AND_GENERATE_WAYPOINTS;
                 stateTimer.reset();
             }
-        } else if (state == AutoState.STATE_DRIVE_TO_GLYPH_BOX) {
-            boolean arrivedAtWaypoint = false;
-            ArrayList<MecanumNavigation.Navigation2D> waypointArray;
-            // Added to ensure array is initialized.
-            waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
-
-            waypointArray = generateWaypoints(teamColor,startPosition, opMode.glyphPositionVuMark, degreesToRadians(30));
-
-            // Do the driving
-            if(currentDriveWaypoint < waypointArray.size() ) {
-                // Show Target Status and debug info
-                opMode.telemetry.addData("Current Waypoint: ", currentDriveWaypoint);
-                opMode.telemetry.addData("Target", waypointArray.get(currentDriveWaypoint).toString());
-                arrivedAtWaypoint = opMode.autoDrive.rotateThenDriveToPosition(waypointArray.get(currentDriveWaypoint),driveRate);
-            }
-            if ( arrivedAtWaypoint) {
-                ++currentDriveWaypoint;
-            }
-
-
-
-            // Next State Logic
-            if (currentDriveWaypoint >= waypointArray.size()) {
-                opMode.stopAllMotors();
-                stateTimer.reset();
-                state = AutoState.STATE_LOWER_GLYPH_ARM;
-            }
-        } else if (state == AutoState.STATE_LOWER_GLYPH_ARM) {
-            if ( opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) > initialArmEncoderTicks) {
-                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR,-0.2);
+        } else if (state == AutoState.STATE_FIND_VUMARK_AND_GENERATE_WAYPOINTS) {
+            if (opMode.glyphPositionVuMark == RelicRecoveryVuMark.UNKNOWN && stateTimer.seconds() < 2) {
+                opMode.autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,degreesToRadians(20)),driveRate);
             } else {
-                opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
-                opMode.stopAllMotors();
+                this.waypointArrayGlobal = generateWaypoints(teamColor,startPosition, opMode.glyphPositionVuMark, degreesToRadians(30));
+                state = AutoState.STATE_DISMOUNT;
                 stateTimer.reset();
-                state = AutoState.STATE_STOP;
             }
+        } else if (state == AutoState.STATE_DISMOUNT) {
+            boolean arrivedAtWaypoint = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(0,driveRate);
+            if (arrivedAtWaypoint) {
+                state = AutoState.STATE_ALIGN_W_OFFSETS;
+                stateTimer.reset();
+            }
+        } else if (state == AutoState.STATE_ALIGN_W_OFFSETS) {
+            boolean arrivedAtWaypoint = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(1,driveRate);
+            if (arrivedAtWaypoint) {
+                state = AutoState.STATE_ROTATE_BEFORE_INSERT_THEN_OPEN_CLAW;
+                stateTimer.reset();
+            }
+        } else if (state == AutoState.STATE_APPROACH_GLYPH_BOX) {
+            boolean arrivedAtWaypoint = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(2,driveRate);
+            if (arrivedAtWaypoint) {
+                state = AutoState.STATE_ROTATE_BEFORE_INSERT_THEN_OPEN_CLAW;
+                stateTimer.reset();
+            }
+        } else if (state == AutoState.STATE_ROTATE_BEFORE_INSERT_THEN_OPEN_CLAW) {
+            boolean arrivedAtWaypoint = false;
+            boolean armLowered = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(3,driveRate);
+
+            if (arrivedAtWaypoint) {
+                // Lower arm
+                if ( opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) > initialArmEncoderTicks) {
+                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR,-0.2);
+                    stateTimer.reset();
+                } else {
+                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                    opMode.stopAllMotors();
+                    armLowered = true;
+                }
+
+
+                if (armLowered) {
+                    // Claw logic
+                    if(waypointArrayGlobal.get(3).theta > waypointArrayGlobal.get(2).theta) {
+                        // Open right servo claw
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+                    } else if(waypointArrayGlobal.get(3).theta < waypointArrayGlobal.get(2).theta) {
+                        // Open left servo claw
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
+                    } else {
+                        // Open both claws
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+                    }
+
+                    if (stateTimer.seconds() > 0.5) {
+                        // Next state logic
+                        opMode.stopAllMotors();
+                        state = AutoState.STATE_INSERT_GLYPH;
+                        stateTimer.reset();
+                    }
+                }
+            }
+        } else if (state == AutoState.STATE_INSERT_GLYPH) {
+            boolean arrivedAtWaypoint = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(4,driveRate);
+            if (arrivedAtWaypoint) {
+                state = AutoState.STATE_BACKUP;
+                stateTimer.reset();
+            }
+        } else if (state == AutoState.STATE_BACKUP) {
+            boolean arrivedAtWaypoint = false;
+            arrivedAtWaypoint = driveToWaypointAtRate(waypointArrayGlobal.size()-1,driveRate);
+
+            // Open both claws
+            opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
+            opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+
+            if (arrivedAtWaypoint) {
+                state = AutoState.STATE_STOP;
+                stateTimer.reset();
+            }
+
         } else if (state == AutoState.STATE_STOP) {
             opMode.stopAllMotors();
             opMode.stop();
@@ -202,6 +235,8 @@ public class AutoDeluxeStateMachine {
             opMode.stopAllMotors();
         }
     }
+
+
 
 
 
@@ -371,6 +406,13 @@ public class AutoDeluxeStateMachine {
         offsetRightTotal += glyphOffsetFromRotation.y;
 
         return offsetRightTotal;
+    }
+
+    private boolean driveToWaypointAtRate(int waypointNumber, double driveRate) {
+        // Show Target Status and debug info
+        opMode.telemetry.addData("Current Waypoint: ", currentDriveWaypoint);
+        opMode.telemetry.addData("Target", waypointArrayGlobal.get(waypointNumber).toString());
+        return opMode.autoDrive.rotateThenDriveToPosition(waypointArrayGlobal.get(waypointNumber),driveRate);
     }
 
 }

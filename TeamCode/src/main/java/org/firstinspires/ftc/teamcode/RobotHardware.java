@@ -264,7 +264,7 @@ public abstract class RobotHardware extends OpMode {
      * @param servo The servo to modify.
      * @param position The angle to set [0, 1].
      */
-    protected void setAngle(ServoName servo, double position) {
+    public void setAngle(ServoName servo, double position) {
         Servo s = allServos.get(servo.ordinal());
         if (s == null) {
             telemetry.addData("Servo Missing", servo.name());
