@@ -103,6 +103,7 @@ public class AutoDeluxe extends RobotHardware {
         telemetry.addData("Vuforia Glyph Position", vuMark);
         autoDeluxeStateMachine.update();
         mecanumNavigation.displayPosition();
+        telemetry.addData("Current State", autoDeluxeStateMachine.state.toString());
     }
 
     private void setVumark(RelicRecoveryVuMark detectedVuMark) {

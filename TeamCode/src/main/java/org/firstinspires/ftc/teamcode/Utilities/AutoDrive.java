@@ -50,7 +50,7 @@ public class AutoDrive {
     }
 
     public boolean rotateThenDriveToPosition(MecanumNavigation.Navigation2D targetPosition, double rate) {
-        double distanceThresholdInches = 1;
+        double distanceThresholdInches = 0.5;
         double angleThresholdRadians = 2.0 * (Math.PI/180.0);
         rate = Range.clip(rate,0,1);
         MecanumNavigation.Navigation2D currentPosition =
@@ -73,7 +73,7 @@ public class AutoDrive {
         } else if (Math.abs(deltaPosition.x) > distanceThresholdInches ||
                    Math.abs(deltaPosition.y) > distanceThresholdInches) {
             Mecanum.Wheels wheels = mecanumNavigation.deltaWheelsFromPosition(targetPosition);
-            rateScale = rampDown(deltaDistance, 5, 0.8, 0.1);
+            rateScale = rampDown(deltaDistance, 10, 1, 0.05);
             wheels = wheels.scaleWheelPower(rateScale * rate);
             opMode.setDriveForMecanumWheels(wheels);
             return false;

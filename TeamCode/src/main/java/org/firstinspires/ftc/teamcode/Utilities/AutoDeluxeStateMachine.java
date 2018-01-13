@@ -53,6 +53,7 @@ public class AutoDeluxeStateMachine {
     private int currentDriveWaypoint = 0;
     private double driveRate = 0.5;
     private double armLiftHeight = 700;
+    private double signedSkewAngleRadiansCCW;
 
 
     public AutoDeluxeStateMachine(AutoDeluxe opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
@@ -187,10 +188,10 @@ public class AutoDeluxeStateMachine {
 
                 if (armLowered) {
                     // Claw logic
-                    if(waypointArrayGlobal.get(3).theta > waypointArrayGlobal.get(2).theta) {
+                    if(signedSkewAngleRadiansCCW > 0) {
                         // Open right servo claw
                         opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
-                    } else if(waypointArrayGlobal.get(3).theta < waypointArrayGlobal.get(2).theta) {
+                    } else if(signedSkewAngleRadiansCCW < 0) {
                         // Open left servo claw
                         opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
                     } else {
@@ -210,7 +211,7 @@ public class AutoDeluxeStateMachine {
         } else if (state == AutoState.STATE_INSERT_GLYPH) {
             boolean arrivedAtWaypoint = false;
             arrivedAtWaypoint = driveToWaypointAtRate(4,driveRate);
-            if (arrivedAtWaypoint) {
+            if (arrivedAtWaypoint || stateTimer.seconds() > 4) {
                 state = AutoState.STATE_BACKUP;
                 stateTimer.reset();
             }
@@ -268,7 +269,7 @@ public class AutoDeluxeStateMachine {
         double approachCenter = 0;
         double insertCorner = 12;
         double insertCenter = 12;
-        double backupDistance = 1;
+        double backupDistance = 4;
 
         // Calculate trueSkew, skew with the appropriate sign.
         double trueSkewAngleRadiansCCW = 0;
@@ -285,6 +286,7 @@ public class AutoDeluxeStateMachine {
                 trueSkewAngleRadiansCCW = -1 * Math.abs(insertionSkewRadiansCCW);
             }
         }
+        this.signedSkewAngleRadiansCCW = trueSkewAngleRadiansCCW;
 
         double alignmentOffsetRightTotal = getGlyphboxOffsetTowardRight(opMode.glyphPositionVuMark, trueSkewAngleRadiansCCW);
         double rotationInsertionCorrection = -getGlyphOffsetFromRotation(trueSkewAngleRadiansCCW).x;
