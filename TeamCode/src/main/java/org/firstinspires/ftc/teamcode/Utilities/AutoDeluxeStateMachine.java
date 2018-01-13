@@ -228,7 +228,7 @@ public class AutoDeluxeStateMachine {
         double dismountBlueDistance = 25;
         double dismountRedDistance = 25;
         double alignmentStrafeCorner = 12;
-        double alignmentDriveCenter = 32;
+        double alignmentDriveCenter = 29;
         double approachCorner = 0;
         double approachCenter = 0;
         double insertCorner = 12;
