@@ -225,10 +225,10 @@ public class AutoDeluxeStateMachine {
                                 RelicRecoveryVuMark positionVumark, double insertionSkewRadiansCCW) {
         ArrayList<MecanumNavigation.Navigation2D> waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
 
-        double dismountBlueDistance = 25;
+        double dismountBlueDistance = 24;
         double dismountRedDistance = 25;
         double alignmentStrafeCorner = 12;
-        double alignmentDriveCenter = 29;
+        double alignmentDriveCenter = 22 - 6;
         double approachCorner = 0;
         double approachCenter = 0;
         double insertCorner = 12;
