@@ -225,8 +225,8 @@ public class AutoDeluxeStateMachine {
                                 RelicRecoveryVuMark positionVumark, double insertionSkewRadiansCCW) {
         ArrayList<MecanumNavigation.Navigation2D> waypointArray = new ArrayList<>(Arrays.asList(new MecanumNavigation.Navigation2D(0,0,0)));
 
-        double dismountBlueDistance = 20;
-        double dismountRedDistance = 20;
+        double dismountBlueDistance = 25;
+        double dismountRedDistance = 25;
         double alignmentStrafeCorner = 12;
         double alignmentDriveCenter = 32;
         double approachCorner = 0;
@@ -348,7 +348,7 @@ public class AutoDeluxeStateMachine {
 
 
     private MecanumNavigation.Navigation2D getGlyphOffsetFromRotation(double rotationRadians) {
-        double distanceToGlyphCenter = 12+3; // Added half of glyph width to lever arm.
+        double distanceToGlyphCenter = 12+6; // Added half of glyph width to lever arm.
         return new MecanumNavigation.Navigation2D( distanceToGlyphCenter * ( Math.cos(rotationRadians) - 1), distanceToGlyphCenter * Math.sin(rotationRadians), rotationRadians);
     }
 
