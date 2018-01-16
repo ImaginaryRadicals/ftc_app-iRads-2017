@@ -15,9 +15,6 @@ import java.util.Vector;
 @TeleOp(name="Diagnostic Telemetry Recorder", group="diagnostic")
 public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
 
-    private boolean isTitleVectorInitialized = false;
-    private Vector<String> recordTitles = new Vector<>();
-    private Vector<Double> recordData = new Vector<>();
     private CSV csvWriter;
     private CSV controlWriter;
     private boolean writeControls = false;
