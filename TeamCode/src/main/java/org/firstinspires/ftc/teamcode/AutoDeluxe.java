@@ -26,7 +26,7 @@ public class AutoDeluxe extends RobotHardware {
     protected Color.Ftc robotColor;
     protected StartPosition robotStartPos;
     protected AutoDeluxeStateMachine autoDeluxeStateMachine;
-    private SimpleVuforia vuforia;
+    protected SimpleVuforia vuforia;
     public RelicRecoveryVuMark glyphPositionVuMark;
 
 
