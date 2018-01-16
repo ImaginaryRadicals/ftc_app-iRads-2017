@@ -87,9 +87,19 @@ public class AutoDeluxe extends RobotHardware {
     }
 
     @Override
+    public void init_loop() {
+        super.init_loop();
+        telemetry.addData("Initialization:", "Successful!");
+        displayColorSensorTelemetry();
+    }
+
+    @Override
     public void start() {
         armServoTop();
         super.init();
+        // Ensure starting position at origin, even if wheels turned since initialize.
+        mecanumNavigation.update();
+        mecanumNavigation.setCurrentPosition(new MecanumNavigation.Navigation2D(0,0,0));
         autoDeluxeStateMachine.init();
     }
 
@@ -103,6 +113,8 @@ public class AutoDeluxe extends RobotHardware {
         autoDeluxeStateMachine.update();
         mecanumNavigation.displayPosition();
         telemetry.addData("Current State", autoDeluxeStateMachine.state.toString());
+        telemetry.addLine();
+        displayColorSensorTelemetry();
     }
 
     private void setVumark(RelicRecoveryVuMark detectedVuMark) {
