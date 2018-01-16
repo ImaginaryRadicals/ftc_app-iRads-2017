@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.Utilities;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
-import org.firstinspires.ftc.teamcode.Auto;
 import org.firstinspires.ftc.teamcode.AutoDeluxe;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 
 import java.util.ArrayList;
 import java.util.Arrays;

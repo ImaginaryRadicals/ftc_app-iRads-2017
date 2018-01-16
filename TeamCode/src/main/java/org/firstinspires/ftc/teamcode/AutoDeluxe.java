@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.teamcode.Utilities.AutoDeluxeStateMachine;
 import org.firstinspires.ftc.teamcode.Utilities.AutoDrive;
-import org.firstinspires.ftc.teamcode.Utilities.AutoSimpleJewelStateMachine;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
 import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
