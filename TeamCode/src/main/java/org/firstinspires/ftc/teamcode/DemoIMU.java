@@ -67,6 +67,7 @@ public class DemoIMU extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
+    Acceleration acceleration;
 
     //----------------------------------------------------------------------------------------------
     // Main logic
@@ -80,7 +81,7 @@ public class DemoIMU extends LinearOpMode
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
@@ -121,6 +122,7 @@ public class DemoIMU extends LinearOpMode
                 // three times the necessary expense.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 gravity  = imu.getGravity();
+                acceleration = imu.getLinearAcceleration();
                 }
             });
 
@@ -165,6 +167,23 @@ public class DemoIMU extends LinearOpMode
                             Math.sqrt(gravity.xAccel*gravity.xAccel
                                     + gravity.yAccel*gravity.yAccel
                                     + gravity.zAccel*gravity.zAccel));
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("X Accel", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f", acceleration.xAccel);
+                    }
+                })
+                .addData("Y Accel", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f", acceleration.yAccel);
+                    }
+                })
+                .addData("Z Accel", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f", acceleration.zAccel);
                     }
                 });
     }
