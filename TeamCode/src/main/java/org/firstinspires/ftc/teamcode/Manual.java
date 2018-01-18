@@ -22,6 +22,8 @@ import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 public class Manual extends RobotHardware {
 
     public Controller controller = null;
+    public Controller copilotController = null;
+    public boolean copilotControllerActive = false;
     public MecanumNavigation mecanumNavigation;
     public AutoDrive autoDrive;
     private boolean use_telemetry = true;
@@ -42,6 +44,7 @@ public class Manual extends RobotHardware {
     public void init() {
         super.init();
         controller = new Controller(gamepad1);
+        copilotController = new Controller(gamepad2);
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
@@ -108,6 +111,12 @@ public class Manual extends RobotHardware {
             }
         } else {
             // Non-chord robot inputs
+
+            // Toggle copilot controller activation
+            if (copilotController.startOnce() || controller.startOnce()) {
+                copilotControllerActive = ! copilotControllerActive;
+            }
+
             robotControls();
         }
 
@@ -118,6 +127,7 @@ public class Manual extends RobotHardware {
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
             telemetry.addData("pickupPosition",pickupPosition.toString());
+            telemetry.addData("CoPilot Active", copilotControllerActive);
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -169,15 +179,17 @@ public class Manual extends RobotHardware {
         // Arm controls
         double left_trigger = gamepad1.left_trigger; // Arm Dowm
         double right_trigger = gamepad1.right_trigger; // Arm Up
+        double armPower = 0;
+        double coPilotArmPower = copilotControllerActive ? getCopilotArmCommand(copilotController) : 0;
 
         if (left_trigger > 0.1) {
-            setPower(MotorName.ARM_MOTOR, sign * -(0.05 + 0.45 * left_trigger));
+            armPower = sign * -(0.05 + 0.45 * left_trigger);
         } else if (right_trigger > 0.1) {
-            setPower(MotorName.ARM_MOTOR, sign * (0.05 + 0.45 * right_trigger));
+            armPower = sign * (0.05 + 0.45 * right_trigger);
         } else {
-            setPower(MotorName.ARM_MOTOR, 0);
+            armPower = 0;
         }
-
+        setPower(MotorName.ARM_MOTOR, armPower + coPilotArmPower);
 
         clawStateMachine();
 
@@ -240,5 +252,20 @@ public class Manual extends RobotHardware {
         setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
     }
 
+    private double getCopilotArmCommand(Controller copilotController) {
+        double armPower = 0;
+        double left_trigger = copilotController.left_trigger;
+        double right_trigger = copilotController.right_trigger;
+        double sign = 1;
 
+        if (left_trigger > 0.1) {
+            armPower =  sign * -(0.05 + 0.45 * left_trigger);
+        } else if (right_trigger > 0.1) {
+            armPower = sign * (0.05 + 0.45 * right_trigger);
+        } else {
+            armPower = 0;
+            armPower = Math.pow(-copilotController.right_stick_y,3);
+        }
+        return armPower;
+    }
 }
