@@ -51,7 +51,6 @@ public class AutoOpmodeRecorder extends AutoDeluxe {
 
 
     private CSV csvWriter;
-    private CSV controlWriter;
 
     @Override
     public void init() {
@@ -69,6 +68,7 @@ public class AutoOpmodeRecorder extends AutoDeluxe {
     @Override
     public void start() {
         super.start();
+        createBlankControlerFile();
     }
 
     @Override
@@ -127,6 +127,19 @@ public class AutoOpmodeRecorder extends AutoDeluxe {
 
         // Writes record to file if writer is open.
         csvWriter.completeRecord();
+    }
+
+    private void createBlankControlerFile() {
+        CSV controlWriter = new CSV(this);
+        controlWriter.open("controls.csv");
+        String[] fieldList = {"time", "left_stick_x", "left_stick_y", "right_stick_x",
+                "right_stick_y", "left_trigger", "right_trigger", "right_stick_button",
+                "left_stick_button", "right_bumper", "left_bumper", "a_button", "b_button",
+                "x_button", "y_button"};
+       for(int i = 0; i < fieldList.length; ++i) {
+           controlWriter.addFieldToRecord(fieldList[i],0.0);
+       }
+        controlWriter.completeRecord();
     }
 
 }
