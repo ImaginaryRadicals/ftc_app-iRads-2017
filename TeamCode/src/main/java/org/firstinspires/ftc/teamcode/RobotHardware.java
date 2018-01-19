@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -41,6 +42,8 @@ public abstract class RobotHardware extends OpMode {
     // Names of only the drive motors.
     private ArrayList<MotorName> driveMotorNames;
 
+    // IMU reference
+    public BNO055IMU imu;
 
     // Execution cycle period monitor.
     private ElapsedTime period  = new ElapsedTime();
@@ -485,6 +488,10 @@ public abstract class RobotHardware extends OpMode {
         return vuforiaLicenseKey;
     }
 
+    // IMU Names (Could support multiple REV IMUs)
+    public enum IMUNames {
+        IMU,
+    }
 
     /**
      * Should be executed at the beginning of loop() function.
