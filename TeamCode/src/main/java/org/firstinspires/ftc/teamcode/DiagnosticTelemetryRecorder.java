@@ -65,6 +65,9 @@ public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
         csvWriter.addFieldToRecord("y_in",mecanumNavigation.currentPosition.y);
         csvWriter.addFieldToRecord("theta_rad",mecanumNavigation.currentPosition.theta);
 
+        // Add IMU data to current csvWriter record
+        addIMUToRecord(csvWriter);
+
         // Writes record to file if writer is open.
         csvWriter.completeRecord();
         
@@ -118,4 +121,19 @@ public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
 
         controlWriter.completeRecord();
     }
+
+    /**
+     * Adds IMU fields to Record for given CSV object.
+     * Does NOT complete record or close the file.
+     * @param csvWriterObject
+     */
+    private void addIMUToRecord(CSV csvWriterObject) {
+        csvWriterObject.addFieldToRecord("heading",imuHelper.heading);
+        csvWriterObject.addFieldToRecord("pitch",imuHelper.pitch);
+        csvWriterObject.addFieldToRecord("roll",imuHelper.roll);
+        csvWriterObject.addFieldToRecord("xAccel",imuHelper.xAccel);
+        csvWriterObject.addFieldToRecord("yAccel",imuHelper.yAccel);
+        csvWriterObject.addFieldToRecord("zAccel",imuHelper.zAccel);
+    }
+
 }

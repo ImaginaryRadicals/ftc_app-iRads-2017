@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Utilities.Color;
+import org.firstinspires.ftc.teamcode.Utilities.IMUUtilities;
 
 
 /**
@@ -14,17 +15,21 @@ import org.firstinspires.ftc.teamcode.Utilities.Color;
 @TeleOp(name="Diagnostic", group="diagnostic")
 public class DiagnosticOpMode extends Manual {
 
+    IMUUtilities imuHelper;
+
     @Override
     public void init() {
         super.init();
+        imuHelper = new IMUUtilities(this, "IMU");
         telemetry.addData("Diagnostic Mode ", " Initialized");
     }
 
     @Override
     public void loop() {
         super.loop();
-
+        imuHelper.update();
         showDiagnosticTelemetry();
+        imuHelper.displayTelemetry();
     }
 
 

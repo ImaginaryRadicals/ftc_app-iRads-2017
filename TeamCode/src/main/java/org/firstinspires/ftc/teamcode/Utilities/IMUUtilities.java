@@ -56,6 +56,10 @@ public class IMUUtilities {
         zAccel = acceleration.zAccel;
     }
 
+    public void displayTelemetry() {
+        displayIMUTelemetry(imu, opMode);
+    }
+
     // Static Functions
 
     /**
