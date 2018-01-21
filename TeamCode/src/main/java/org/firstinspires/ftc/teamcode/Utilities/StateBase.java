@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
+import java.util.ArrayList;
+
 /**
  * Created by HomeStephen on 12/15/17.
  */
@@ -8,6 +10,8 @@ package org.firstinspires.ftc.teamcode.Utilities;
 public abstract class StateBase {
 
     private boolean initialized = false;
+    private boolean deleteRequested = false;
+    private ArrayList<StateBase> newStates;
 
     public void init() {
         initialized = true;
@@ -21,8 +25,29 @@ public abstract class StateBase {
         initialized = false;
     }
 
-    boolean isInitialized()
-    {
+    boolean isInitialized() {
         return initialized;
     }
+
+    public void requestDelete() {
+        deleteRequested = true;
+    }
+
+    public boolean isDeleteRequested() {
+        return deleteRequested;
+    }
+
+    public ArrayList<StateBase> getNewStates() {
+        return newStates;
+    }
+
+    /**
+     * Clear nextStates array
+     */
+    public void clearNewStates() {
+        while(newStates.size() >= 0) {
+            newStates.remove(0);
+        }
+    }
+
 }
