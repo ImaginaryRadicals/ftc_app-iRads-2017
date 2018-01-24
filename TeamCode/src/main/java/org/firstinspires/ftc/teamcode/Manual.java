@@ -71,6 +71,7 @@ public class Manual extends RobotHardware {
         super.loop();
         // Keep controller rising edge trigger updated.
         controller.update();
+        copilotController.update();
         // Update mecanum encoder navigation via opMode context.
         mecanumNavigation.update();
 
