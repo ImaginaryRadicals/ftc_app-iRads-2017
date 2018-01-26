@@ -14,10 +14,10 @@ public class Constants {
     public static final double LEFT_CLAW_RELEASE = 0.17;
     public static final double RIGHT_CLAW_RELEASE = 0.17;
 
-    public static final double LEFT_CLAW_CLOSED = 0.04;
-    public static final double RIGHT_CLAW_CLOSED = 0.04;
-    public static final double INITIAL_LEFT_CLAW_POS = 1.0;
-    public static final double INITIAL_RIGHT_CLAW_POS = 1.0;
+    public static final double LEFT_CLAW_CLOSED = 0.07;
+    public static final double RIGHT_CLAW_CLOSED = 0.07;
+    public static final double INITIAL_LEFT_CLAW_POS = 0.65;
+    public static final double INITIAL_RIGHT_CLAW_POS = 0.65;
 
     public static final double JEWEL_ARM_INITIAL = 0.97;
     public static final double JEWEL_ARM_BOTTOM = 0.05;
