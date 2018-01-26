@@ -11,11 +11,11 @@ public class Constants {
     // public doubles for the left and right CLAW
     public static final double LEFT_CLAW_OPEN = 0.31;
     public static final double RIGHT_CLAW_OPEN = 0.31;
-    public static final double LEFT_CLAW_RELEASE = 0.17;
-    public static final double RIGHT_CLAW_RELEASE = 0.17;
+    public static final double LEFT_CLAW_RELEASE = 0.07;
+    public static final double RIGHT_CLAW_RELEASE = 0.07;
 
-    public static final double LEFT_CLAW_CLOSED = 0.07;
-    public static final double RIGHT_CLAW_CLOSED = 0.07;
+    public static final double LEFT_CLAW_CLOSED = 0.00;
+    public static final double RIGHT_CLAW_CLOSED = 0.00;
     public static final double INITIAL_LEFT_CLAW_POS = 0.65;
     public static final double INITIAL_RIGHT_CLAW_POS = 0.65;
 
