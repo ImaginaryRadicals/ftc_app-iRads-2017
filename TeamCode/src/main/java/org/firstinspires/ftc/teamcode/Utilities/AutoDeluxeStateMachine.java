@@ -188,14 +188,14 @@ public class AutoDeluxeStateMachine {
                     // Claw logic
                     if(signedSkewAngleRadiansCCW > 0) {
                         // Open right servo claw
-                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,Constants.INITIAL_RIGHT_CLAW_POS);
                     } else if(signedSkewAngleRadiansCCW < 0) {
                         // Open left servo claw
-                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,Constants.INITIAL_LEFT_CLAW_POS);
                     } else {
                         // Open both claws
-                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
-                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,Constants.INITIAL_LEFT_CLAW_POS);
+                        opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,Constants.INITIAL_RIGHT_CLAW_POS);
                     }
 
                     if (stateTimer.seconds() > 0.5) {
@@ -218,8 +218,8 @@ public class AutoDeluxeStateMachine {
             arrivedAtWaypoint = driveToWaypointAtRate(5,driveRate);
 
             // Open both claws
-            opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,1);
-            opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,1);
+            opMode.setAngle(RobotHardware.ServoName.CLAW_LEFT,Constants.INITIAL_LEFT_CLAW_POS);
+            opMode.setAngle(RobotHardware.ServoName.CLAW_RIGHT,Constants.INITIAL_RIGHT_CLAW_POS);
 
             if (arrivedAtWaypoint) {
                 state = AutoState.STATE_STOP;

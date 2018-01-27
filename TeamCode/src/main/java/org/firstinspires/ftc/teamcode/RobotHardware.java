@@ -360,7 +360,7 @@ public abstract class RobotHardware extends OpMode {
     }
 
     // Set servo claw to given position
-    protected void setPositionClaw(double position) {
+    public void setPositionClaw(double position) {
         setAngle(ServoName.CLAW_LEFT, position);
         setAngle(ServoName.CLAW_RIGHT, position);
     }
