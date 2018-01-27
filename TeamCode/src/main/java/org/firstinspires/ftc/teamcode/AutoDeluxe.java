@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Utilities.AutoDeluxeStateMachine;
 import org.firstinspires.ftc.teamcode.Utilities.AutoDrive;
 import org.firstinspires.ftc.teamcode.Utilities.Color;
 import org.firstinspires.ftc.teamcode.Utilities.Constants;
+import org.firstinspires.ftc.teamcode.Utilities.Controller;
 import org.firstinspires.ftc.teamcode.Utilities.MecanumNavigation;
 import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 
@@ -28,6 +29,11 @@ public class AutoDeluxe extends RobotHardware {
     protected AutoDeluxeStateMachine autoDeluxeStateMachine;
     protected SimpleVuforia vuforia;
     public RelicRecoveryVuMark glyphPositionVuMark;
+    public Controller controller;
+    public SkewMode skewMode = SkewMode.NORMAL;
+    public enum SkewMode{
+        NORMAL, T0, T90, TNEG90,
+    }
 
 
     @Autonomous(name="deluxe.Red.Center", group="deluxeAuto")
@@ -69,6 +75,7 @@ public class AutoDeluxe extends RobotHardware {
     @Override
     public void init() {
         super.init();
+        controller = new Controller(gamepad1);
         vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, false, false);
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
@@ -89,6 +96,7 @@ public class AutoDeluxe extends RobotHardware {
     @Override
     public void init_loop() {
         super.init_loop();
+        controller.update();
         telemetry.addData("Initialization:", "Successful!");
         displayColorSensorTelemetry();
     }
@@ -106,6 +114,7 @@ public class AutoDeluxe extends RobotHardware {
     @Override
     public void loop() {
         super.loop();
+        controller.update();
         mecanumNavigation.update();
         RelicRecoveryVuMark vuMark = vuforia.detectMark();
         setVumark(vuMark); // Store last non-UNKNOWN vumark detected.
@@ -120,6 +129,29 @@ public class AutoDeluxe extends RobotHardware {
     private void setVumark(RelicRecoveryVuMark detectedVuMark) {
         if ( detectedVuMark != RelicRecoveryVuMark.UNKNOWN) {
             this.glyphPositionVuMark = detectedVuMark;
+        }
+    }
+
+    private void skewModeSelect(){
+        // Select control mode with dpad left and right.
+        telemetry.addData("Select Control Mode:","");
+        telemetry.addData("Control Mode:", skewMode.toString());
+        if(controller.dpadRightOnce()) {
+            if( skewMode.ordinal() >=  SkewMode.values().length -1) {
+                // If at max value, loop to first.
+                skewMode = SkewMode.values()[0];
+            } else {
+                // Go to next control mode
+                skewMode = SkewMode.values()[skewMode.ordinal() + 1];
+            }
+        } else if ( controller.dpadLeftOnce()) {
+            if (skewMode.ordinal() <= 0) {
+                // If at first value, loop to last value
+                skewMode = SkewMode.values()[SkewMode.values().length-1];
+            } else {
+                // Go to previous control mode
+                skewMode = SkewMode.values()[skewMode.ordinal() - 1];
+            }
         }
     }
 }

@@ -211,6 +211,10 @@ public class ArmControlTest extends OpMode {
             }
         }
 
+        void decrementState(int currentEncoderValues) {
+
+        }
+
     }
 
 

@@ -284,6 +284,17 @@ public class AutoDeluxeStateMachine {
                 trueSkewAngleRadiansCCW = -1 * Math.abs(insertionSkewRadiansCCW);
             }
         }
+
+        if (opMode.skewMode == AutoDeluxe.SkewMode.NORMAL) {
+
+        } else if(opMode.skewMode == AutoDeluxe.SkewMode.T0) {
+            trueSkewAngleRadiansCCW = 0;
+        } else if(opMode.skewMode == AutoDeluxe.SkewMode.T90) {
+            trueSkewAngleRadiansCCW = 90;
+        } else if(opMode.skewMode == AutoDeluxe.SkewMode.TNEG90) {
+            trueSkewAngleRadiansCCW = -90;
+        }
+
         this.signedSkewAngleRadiansCCW = trueSkewAngleRadiansCCW;
 
         double alignmentOffsetRightTotal = getGlyphboxOffsetTowardRight(opMode.glyphPositionVuMark, trueSkewAngleRadiansCCW);
