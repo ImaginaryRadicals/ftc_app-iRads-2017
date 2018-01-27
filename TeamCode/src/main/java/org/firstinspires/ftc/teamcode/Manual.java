@@ -184,9 +184,9 @@ public class Manual extends RobotHardware {
         double coPilotArmPower = copilotControllerActive ? getCopilotArmCommand(copilotController) : 0;
 
         if (left_trigger > 0.1) {
-            armPower = sign * -(0.05 + 0.45 * left_trigger);
+            armPower = -(0.05 + 0.45 * left_trigger);
         } else if (right_trigger > 0.1) {
-            armPower = sign * (0.05 + 0.45 * right_trigger);
+            armPower = (0.05 + 0.45 * right_trigger);
         } else {
             armPower = 0;
         }
