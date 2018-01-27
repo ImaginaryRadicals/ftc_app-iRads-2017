@@ -23,6 +23,7 @@ public class Constants {
     public static final double JEWEL_ARM_BOTTOM = 0.05;
     public static final double JEWEL_ARM_TOP = 0.81;
 
+    public static final double ARM_TICKS_PER_DEGREE = 5;
     public static final int RAISE_ARM_POSITION = 3000;
     public static final int LOWER_ARM_POSITION = 0;
 
