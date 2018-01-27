@@ -293,6 +293,10 @@ public class AutoDeluxeStateMachine {
             trueSkewAngleRadiansCCW = 90;
         } else if(opMode.skewMode == AutoDeluxe.SkewMode.TNEG90) {
             trueSkewAngleRadiansCCW = -90;
+        } else if(opMode.skewMode == AutoDeluxe.SkewMode.T30) {
+            trueSkewAngleRadiansCCW = 30;
+        } else if (opMode.skewMode == AutoDeluxe.SkewMode.TNEG30) {
+            trueSkewAngleRadiansCCW = -30;
         }
 
         this.signedSkewAngleRadiansCCW = trueSkewAngleRadiansCCW;

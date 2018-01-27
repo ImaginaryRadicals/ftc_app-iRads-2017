@@ -32,7 +32,7 @@ public class AutoDeluxe extends RobotHardware {
     public Controller controller;
     public SkewMode skewMode = SkewMode.NORMAL;
     public enum SkewMode{
-        NORMAL, T0, T90, TNEG90,
+        NORMAL, T0, T90, TNEG90, T30, TNEG30,
     }
 
 
@@ -97,6 +97,7 @@ public class AutoDeluxe extends RobotHardware {
     public void init_loop() {
         super.init_loop();
         controller.update();
+        skewModeSelect();
         telemetry.addData("Initialization:", "Successful!");
         displayColorSensorTelemetry();
     }
