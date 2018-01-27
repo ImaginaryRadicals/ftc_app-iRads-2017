@@ -36,6 +36,12 @@ public class IMUUtilities {
     protected Acceleration gravity;
     protected Acceleration acceleration;
 
+    protected BNO055IMU.SystemStatus imuSystemStatus;
+    protected BNO055IMU.CalibrationStatus imuCalibrationStatus;
+
+    private double lastUpdateSec = 0;
+    private double minUpdateDelay = 1.0; // Seconds
+
     public IMUUtilities(RobotHardware opMode, String imu_name) {
         this.opMode = opMode;
         imu = initializeIMU(this.opMode, imu_name);
@@ -44,20 +50,36 @@ public class IMUUtilities {
 
 
     public void update() {
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        gravity = imu.getGravity();
-        acceleration = imu.getLinearAcceleration();
+        // Update rate is limited by minUpdateDelay to prevent too many costly operations.
+        // Updating this data is quite expensive.
+        if (opMode.time - lastUpdateSec > minUpdateDelay) {
+            lastUpdateSec = opMode.time;
 
-        heading = angles.firstAngle;
-        roll = angles.secondAngle;
-        pitch = angles.thirdAngle;
-        xAccel = acceleration.xAccel;
-        yAccel = acceleration.yAccel;
-        zAccel = acceleration.zAccel;
+            imuSystemStatus = imu.getSystemStatus();
+            imuCalibrationStatus = imu.getCalibrationStatus();
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            gravity = imu.getGravity();
+            acceleration = imu.getLinearAcceleration();
+
+            heading = angles.firstAngle;
+            roll = angles.secondAngle;
+            pitch = angles.thirdAngle;
+            xAccel = acceleration.xAccel;
+            yAccel = acceleration.yAccel;
+            zAccel = acceleration.zAccel;
+        }
+    }
+
+    // How stale is our data?
+    public double dataAge() {
+      return opMode.time - lastUpdateSec;
     }
 
     public void displayTelemetry() {
-        displayIMUTelemetry(imu, opMode);
+        // Uses class data from most recent update.
+        displayIMUTelemetry(imuSystemStatus, imuCalibrationStatus, angles, gravity, acceleration, opMode);
+        opMode.telemetry.addData("IMU data age", dataAge());
     }
 
     // Static Functions
@@ -102,78 +124,50 @@ public class IMUUtilities {
 
     /**
      * Display telemetry data for the IMU
-     * @param imu
+     * @param systemStatus
+     * @param calibrationStatus
+     * @param angles
+     * @param gravity
+     * @param acceleration
      * @param opMode
      */
-    static public void displayIMUTelemetry(final BNO055IMU imu, RobotHardware opMode) {
+    static public void displayIMUTelemetry(BNO055IMU.SystemStatus systemStatus,
+                                           BNO055IMU.CalibrationStatus calibrationStatus,
+                                           Orientation angles, Acceleration gravity, Acceleration acceleration,
+                                           RobotHardware opMode) {
 
-        // Acquiring the angles is relatively expensive; we don't want
-        // to do that in each of the three items that need that info, as that's
-        // three times the necessary expense.
-        final Orientation angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        final Acceleration gravity  = imu.getGravity();
-        final Acceleration acceleration = imu.getLinearAcceleration();
-
-        opMode.telemetry.addLine()
-                .addData("status", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getSystemStatus().toShortString();
-                    }
-                })
-                .addData("calib", new Func<String>() {
-                    @Override public String value() {
-                        return imu.getCalibrationStatus().toString();
-                    }
-                });
+        opMode.telemetry.addLine().
+            addData("status",  systemStatus.toShortString())
+            .addData("calib",calibrationStatus.toString());
 
         opMode.telemetry.addLine()
-                .addData("heading", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle);
-                    }
-                })
-                .addData("roll", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.secondAngle);
-                    }
-                })
-                .addData("pitch", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(angles.angleUnit, angles.thirdAngle);
-                    }
-                });
+                .addData("heading", formatAngle(angles.angleUnit, angles.firstAngle))
+                .addData("roll", formatAngle(angles.angleUnit, angles.secondAngle))
+                .addData("pitch", formatAngle(angles.angleUnit, angles.thirdAngle));
 
         opMode.telemetry.addLine()
-                .addData("grvty", new Func<String>() {
-                    @Override public String value() {
-                        return gravity.toString();
-                    }
-                })
-                .addData("mag", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f",
+                .addData("grvty", gravity.toString())
+                .addData("mag", String.format(Locale.getDefault(), "%.3f",
                                 Math.sqrt(gravity.xAccel*gravity.xAccel
                                         + gravity.yAccel*gravity.yAccel
-                                        + gravity.zAccel*gravity.zAccel));
-                    }
-                });
+                                        + gravity.zAccel*gravity.zAccel)));
 
         opMode.telemetry.addLine()
-                .addData("X Accel", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f", acceleration.xAccel);
-                    }
-                })
-                .addData("Y Accel", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f", acceleration.yAccel);
-                    }
-                })
-                .addData("Z Accel", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f", acceleration.zAccel);
-                    }
-                });
+                .addData("X Accel", String.format(Locale.getDefault(), "%.3f", acceleration.xAccel))
+                .addData("Y Accel", String.format(Locale.getDefault(), "%.3f", acceleration.yAccel))
+                .addData("Z Accel", String.format(Locale.getDefault(), "%.3f", acceleration.zAccel));
+    }
+
+
+
+    static public void displayIMUTelemetry(final BNO055IMU imu, RobotHardware opMode) {
+        BNO055IMU.SystemStatus systemStatus = imu.getSystemStatus();
+        BNO055IMU.CalibrationStatus calibrationStatus = imu.getCalibrationStatus();
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        Acceleration gravity = imu.getGravity();
+        Acceleration acceleration = imu.getLinearAcceleration();
+
+        displayIMUTelemetry(systemStatus, calibrationStatus, angles, gravity, acceleration, opMode);
     }
 
 
