@@ -66,7 +66,7 @@ public class DiagnosticTelemetryRecorder extends DiagnosticOpMode {
         csvWriter.addFieldToRecord("theta_rad",mecanumNavigation.currentPosition.theta);
 
         // Add IMU data to current csvWriter record
-        addIMUToRecord(csvWriter);
+        //addIMUToRecord(csvWriter);
 
         // Writes record to file if writer is open.
         csvWriter.completeRecord();

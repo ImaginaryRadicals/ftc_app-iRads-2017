@@ -20,16 +20,16 @@ public class DiagnosticOpMode extends Manual {
     @Override
     public void init() {
         super.init();
-        imuHelper = new IMUUtilities(this, "IMU");
+        //imuHelper = new IMUUtilities(this, "IMU");
         telemetry.addData("Diagnostic Mode ", " Initialized");
     }
 
     @Override
     public void loop() {
         super.loop();
-        imuHelper.update();
+        //imuHelper.update();
         showDiagnosticTelemetry();
-        imuHelper.displayTelemetry();
+        //imuHelper.displayTelemetry();
     }
 
 
