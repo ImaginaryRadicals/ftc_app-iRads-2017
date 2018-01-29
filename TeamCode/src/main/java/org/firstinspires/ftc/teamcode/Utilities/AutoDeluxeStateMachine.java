@@ -288,15 +288,15 @@ public class AutoDeluxeStateMachine {
         if (opMode.skewMode == AutoDeluxe.SkewMode.NORMAL) {
 
         } else if(opMode.skewMode == AutoDeluxe.SkewMode.T0) {
-            trueSkewAngleRadiansCCW = 0;
+            trueSkewAngleRadiansCCW = degreesToRadians(0);
         } else if(opMode.skewMode == AutoDeluxe.SkewMode.T90) {
-            trueSkewAngleRadiansCCW = 90;
+            trueSkewAngleRadiansCCW = degreesToRadians(90);
         } else if(opMode.skewMode == AutoDeluxe.SkewMode.TNEG90) {
-            trueSkewAngleRadiansCCW = -90;
+            trueSkewAngleRadiansCCW = degreesToRadians(-90);
         } else if(opMode.skewMode == AutoDeluxe.SkewMode.T30) {
-            trueSkewAngleRadiansCCW = 30;
+            trueSkewAngleRadiansCCW = degreesToRadians(30);
         } else if (opMode.skewMode == AutoDeluxe.SkewMode.TNEG30) {
-            trueSkewAngleRadiansCCW = -30;
+            trueSkewAngleRadiansCCW = degreesToRadians(-30);
         }
 
         this.signedSkewAngleRadiansCCW = trueSkewAngleRadiansCCW;
