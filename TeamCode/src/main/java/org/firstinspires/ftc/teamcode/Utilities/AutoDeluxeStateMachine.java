@@ -424,7 +424,7 @@ public class AutoDeluxeStateMachine {
      */
     private double getGlyphboxOffsetTowardRight( RelicRecoveryVuMark vumarkPosition, double skewAngleRadiansCCW) {
         MecanumNavigation.Navigation2D glyphOffsetFromRotation = getGlyphOffsetFromRotation(skewAngleRadiansCCW);
-        double columnWidth = 6.5;
+        double columnWidth = 7.63;
         double offsetRightTotal = 0;
         if (vumarkPosition == RelicRecoveryVuMark.LEFT) {
             offsetRightTotal -= columnWidth;
