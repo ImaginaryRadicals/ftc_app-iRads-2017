@@ -17,22 +17,44 @@ import org.firstinspires.ftc.teamcode.Vision.SimpleVuforia;
 @TeleOp(name="Diagnostic VuforiaGlyph", group="diagnostic")
 public class DiagnosticOpModeVuforia extends DiagnosticOpMode {
 
-    private SimpleVuforia vuforia;
+    private SimpleVuforia vuforia = null;
     public int msStuckDetectInit = 10000;
+    private Thread thread;
 
     @Override
     public void init() {
         super.init();
-        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, true, false);
-        telemetry.addData("Diagnostic Vuforia Mode ", " Initialized");
+        thread = new Thread(new VuforiaLoader());
+        thread.start();
+    }
+
+    @Override
+    public void init_loop() {
+        if (vuforia == null) {
+            telemetry.addData("Diagnostic Vuforia Mode ", " LOADING");
+        } else {
+            telemetry.addData("Diagnostic Vuforia Mode ", " INITIALIZED");
+        }
     }
 
     @Override
     public void loop() {
-        RelicRecoveryVuMark vuMark = vuforia.detectMark();
-        telemetry.addData("Vuforia Glyph Position", vuMark);
-        vuforia.displayVuMarkPose();
+        try {
+            RelicRecoveryVuMark vuMark = vuforia.detectMark();
+            telemetry.addData("Vuforia Glyph Position", vuMark);
+            vuforia.displayVuMarkPose();
+        } catch (Exception e) {
+            telemetry.addData("Diagnostic Vuforia Mode ", " NOT INITIALIZED");
+        }
         super.loop();
+    }
+
+
+    // Initialize vuforia in a separate thread to avoid init() hangups.
+    class VuforiaLoader implements Runnable {
+        public void run() {
+            vuforia = new SimpleVuforia(getVuforiaLicenseKey(), DiagnosticOpModeVuforia.this, true, false);
+        }
     }
 
 }

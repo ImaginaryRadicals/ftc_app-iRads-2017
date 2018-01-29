@@ -28,7 +28,8 @@ public class AutoDeluxe extends RobotHardware {
     protected StartPosition robotStartPos;
     protected AutoDeluxeStateMachine autoDeluxeStateMachine;
     protected SimpleVuforia vuforia;
-    public RelicRecoveryVuMark glyphPositionVuMark;
+    public RelicRecoveryVuMark glyphPositionVuMark = RelicRecoveryVuMark.UNKNOWN;
+    private Thread thread;
     public Controller controller;
     public SkewMode skewMode = SkewMode.NORMAL;
     public enum SkewMode{
@@ -76,7 +77,8 @@ public class AutoDeluxe extends RobotHardware {
     public void init() {
         super.init();
         controller = new Controller(gamepad1);
-        vuforia = new SimpleVuforia(getVuforiaLicenseKey(), this, false, false);
+        thread = new Thread(new VuforiaLoader());
+        thread.start();
         mecanumNavigation = new MecanumNavigation(this,
                 new MecanumNavigation.DriveTrainMecanum(
                         Constants.WHEELBASE_LENGTH_IN, Constants.WHEELBASE_WIDTH_IN,
@@ -97,8 +99,12 @@ public class AutoDeluxe extends RobotHardware {
     public void init_loop() {
         super.init_loop();
         controller.update();
+        if (vuforia == null) {
+            telemetry.addData("Vuforia:", "LOADING...");
+        } else {
+            telemetry.addData("Vuforia:", "INITIALIZED");
+        }
         skewModeSelect();
-        telemetry.addData("Initialization:", "Successful!");
         displayColorSensorTelemetry();
     }
 
@@ -117,9 +123,13 @@ public class AutoDeluxe extends RobotHardware {
         super.loop();
         controller.update();
         mecanumNavigation.update();
-        RelicRecoveryVuMark vuMark = vuforia.detectMark();
-        setVumark(vuMark); // Store last non-UNKNOWN vumark detected.
-        telemetry.addData("Vuforia Glyph Position", vuMark);
+        try {
+            RelicRecoveryVuMark vuMark = vuforia.detectMark();
+            setVumark(vuMark); // Store last non-UNKNOWN vumark detected.
+            telemetry.addData("Vuforia Glyph Position", vuMark);
+        } catch (Exception e) {
+            telemetry.addData("Vuforia", "NOT INITIALIZED");
+        }
         autoDeluxeStateMachine.update();
         mecanumNavigation.displayPosition();
         telemetry.addData("Current State", autoDeluxeStateMachine.state.toString());
@@ -130,6 +140,13 @@ public class AutoDeluxe extends RobotHardware {
     private void setVumark(RelicRecoveryVuMark detectedVuMark) {
         if ( detectedVuMark != RelicRecoveryVuMark.UNKNOWN) {
             this.glyphPositionVuMark = detectedVuMark;
+        }
+    }
+
+    // Initialize vuforia in a separate thread to avoid init() hangups.
+    class VuforiaLoader implements Runnable {
+        public void run() {
+            vuforia = new SimpleVuforia(getVuforiaLicenseKey(), AutoDeluxe.this, false, false);
         }
     }
 
