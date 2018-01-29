@@ -40,7 +40,7 @@ public class ArmControlTest extends OpMode {
     double lastLoopTimestamp = 0;
     double initialEncoderTicks;
 
-    enum ArmState {
+    private enum ArmState {
         LEVEL_1,
         LEVEL_2,
         LEVEL_3,
@@ -106,16 +106,18 @@ public class ArmControlTest extends OpMode {
     }
 
 
-    /**
-     * Standard control.
-     * Moves too fast up, way too fast down, and falls under own weight.
-     */
-    abstract class ArmRoutine {
+    // Abstract Arm Routine
+    private abstract class ArmRoutine {
         ArmControlTest opMode;
         public abstract void setup();
         public abstract void loop();
     }
 
+
+    /**
+     * Standard control.
+     * Moves too fast up, way too fast down, and falls under own weight.
+     */
     class StandardControl extends ArmRoutine {
 
         StandardControl(ArmControlTest opMode) {
@@ -219,7 +221,7 @@ public class ArmControlTest extends OpMode {
 
 
 
-    double analogArmCommand() {
+    private double analogArmCommand() {
         double left_trigger = controller.left_trigger;
         double right_trigger = controller.right_trigger;
         double armPower = 0;

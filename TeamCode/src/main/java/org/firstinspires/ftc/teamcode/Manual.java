@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -39,6 +41,24 @@ public class Manual extends RobotHardware {
         CLAW_STOWED, CLAW_OPEN, CLAW_RELEASE, CLAW_CLOSED, CLAW_TESTING,
     }
 
+    // Selectable during init_loop()
+    private enum ArmControlMode {
+        STANDARD,
+        MOVE_TO_POSITION,
+    }
+    private ArmControlMode armControlMode = ArmControlMode.STANDARD;
+    private ArmRoutine armRoutine; // Object which initializes and runs arm controls.
+
+    double initialEncoderTicks;
+    private enum ArmState {
+        LEVEL_1,
+        LEVEL_2,
+        LEVEL_3,
+        LEVEL_4,
+        MANUAL_HOLD,
+    }
+    private ArmState armState = ArmState.MANUAL_HOLD;
+
 
     @Override
     public void init() {
@@ -59,8 +79,26 @@ public class Manual extends RobotHardware {
     }
 
     @Override
+    public void init_loop() {
+        controller.update();
+        // Select control mode with dpad left and right.
+        telemetry.addData("Select Mode"," using Dpad left/right");
+        telemetry.addData("Arm Control Mode:", armControlMode.toString());
+        armControlMenuEnumUpdate();
+    }
+
+    @Override
     public void start() {
         super.start();
+        initialEncoderTicks = getEncoderValue(MotorName.ARM_MOTOR);
+        // Initialize Arm Controls
+        if (armControlMode == ArmControlMode.STANDARD) {
+            armRoutine = new StandardControl(this);
+        } else if (armControlMode == ArmControlMode.MOVE_TO_POSITION) {
+            armRoutine = new MoveToPositionControl(this);
+        }
+
+        armRoutine.setup(); // Run init specific to arm routine.
         storeClaw();
         armServoTop();
     }
@@ -123,12 +161,13 @@ public class Manual extends RobotHardware {
 
 
         if (use_telemetry) {
+            telemetry.addData("CoPilot Active", copilotControllerActive);
+            telemetry.addLine();
             telemetry.addData("Slow", slow_mode);
             telemetry.addData("Fast", fastMode);
             telemetry.addData("Forward Drive", forward_drive);
             telemetry.addData("Arm Encoder", getEncoderValue(MotorName.ARM_MOTOR));
             telemetry.addData("pickupPosition",pickupPosition.toString());
-            telemetry.addData("CoPilot Active", copilotControllerActive);
             telemetry.addLine(); // Visual Space
             mecanumNavigation.displayPosition();
             telemetry.addLine(); // Visual Space
@@ -162,36 +201,29 @@ public class Manual extends RobotHardware {
                     sign * max_rate * Math.pow(gamepad1.left_stick_y, exponential),
                     max_rate * Math.pow(gamepad1.right_stick_x, exponential),
                     max_rate * Math.pow(gamepad1.right_stick_y, exponential));
-        } else { // Auto driving controls on dpad.
-            if (controller.dpadUp()) {
-                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,0,0),1);
-            }
-            if (controller.dpadLeft()) {
-                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,6.5,0),1);
-            }
-            if (controller.dpadRight()) {
-                autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0,-6.5,0),1);
-            }
-            if (controller.dpadDown()) {
-                autoDrive.rotateThenDriveToPosition((MecanumNavigation.Navigation2D)pickupPosition.clone(),1);
+        } else {
+            // Only use dpad if in standard arm control mode.
+            if (armRoutine.getClass() == StandardControl.class) {
+                // Auto driving controls on dpad.
+                if (controller.dpadUp()) {
+                    autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0, 0, 0), 1);
+                }
+                if (controller.dpadLeft()) {
+                    autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0, 7.63, 0), 1);
+                }
+                if (controller.dpadRight()) {
+                    autoDrive.rotateThenDriveToPosition(new MecanumNavigation.Navigation2D(0, -7.63, 0), 1);
+                }
+                if (controller.dpadDown()) {
+                    autoDrive.rotateThenDriveToPosition((MecanumNavigation.Navigation2D) pickupPosition.clone(), 1);
+                }
             }
         }
 
         // Arm controls
-        double left_trigger = gamepad1.left_trigger; // Arm Dowm
-        double right_trigger = gamepad1.right_trigger; // Arm Up
-        double armPower = 0;
-        double coPilotArmPower = copilotControllerActive ? getCopilotArmCommand(copilotController) : 0;
+        armRoutine.loop();
 
-        if (left_trigger > 0.1) {
-            armPower = -(0.05 + 0.45 * left_trigger);
-        } else if (right_trigger > 0.1) {
-            armPower = (0.05 + 0.45 * right_trigger);
-        } else {
-            armPower = 0;
-        }
-        setPower(MotorName.ARM_MOTOR, armPower + coPilotArmPower);
-
+        // Claw Controls
         clawStateMachine();
 
     }
@@ -253,20 +285,124 @@ public class Manual extends RobotHardware {
         setAngle(ServoName.JEWEL_ARM, jewelServoTargetPosition);
     }
 
-    private double getCopilotArmCommand(Controller copilotController) {
+    private double getAnalogArmCommand(Controller thisController) {
+        double left_trigger = thisController.left_trigger;
+        double right_trigger = thisController.right_trigger;
         double armPower = 0;
-        double left_trigger = copilotController.left_trigger;
-        double right_trigger = copilotController.right_trigger;
-        double sign = 1;
 
         if (left_trigger > 0.1) {
-            armPower =  sign * -(0.05 + 0.45 * left_trigger);
+            armPower =  -(0.05 + 0.45 * left_trigger);
         } else if (right_trigger > 0.1) {
-            armPower = sign * (0.05 + 0.45 * right_trigger);
+            armPower = (0.05 + 0.45 * right_trigger);
         } else {
             armPower = 0;
-            armPower = Math.pow(-copilotController.right_stick_y,3);
         }
         return armPower;
     }
+
+
+    private void armControlMenuEnumUpdate() {
+        // Select control mode with dpad left and right.
+        if(controller.dpadRightOnce()) {
+            if( armControlMode.ordinal() >=  armControlMode.values().length -1) {
+                // If at max value, loop to first.
+                armControlMode = ArmControlMode.values()[0];
+            } else {
+                // Go to next control mode
+                armControlMode = ArmControlMode.values()[armControlMode.ordinal() + 1];
+            }
+        } else if ( controller.dpadLeftOnce()) {
+            if (armControlMode.ordinal() <= 0) {
+                // If at first value, loop to last value
+                armControlMode = ArmControlMode.values()[armControlMode.values().length-1];
+            } else {
+                // Go to previous control mode
+                armControlMode = ArmControlMode.values()[armControlMode.ordinal() - 1];
+            }
+        }
+    }
+
+
+
+    // Abstract routine for controlling the arm.
+    private abstract class ArmRoutine {
+        Manual opMode;
+        DcMotor armMotor;
+        public ArmRoutine(Manual opMode) {
+            this.opMode = opMode;
+            this.armMotor = opMode.hardwareMap.get(DcMotor.class, "ARM_MOTOR");
+        }
+        public abstract void setup();
+        public abstract void loop();
+    }
+
+    /**
+     * Standard control.
+     * Moves too fast up, way too fast down, and falls under own weight.
+     */
+    class StandardControl extends ArmRoutine {
+        StandardControl(Manual opMode) {
+            super(opMode);
+        }
+
+        public void setup() {
+            armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        public void loop() {
+            double pilotArmPower = getAnalogArmCommand(opMode.controller);
+            double copilotArmPower = copilotControllerActive ? getAnalogArmCommand(copilotController) : 0;
+            armMotor.setPower(pilotArmPower + copilotArmPower);
+        }
+    }
+
+
+    /**
+     * Use move to position mode to control the arm.
+     */
+    class MoveToPositionControl extends ArmRoutine {
+        private double lastLoopTimestamp = 0;
+
+        MoveToPositionControl(Manual opMode) {
+            super(opMode);
+        }
+
+        public void setup() {
+            armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        public void loop() {
+            double loopPeriod = lastLoopTimestamp - time;
+            lastLoopTimestamp = time;
+            telemetry.addData("Target Distance", armMotor.getTargetPosition() - armMotor.getCurrentPosition());
+
+            // MaxTick rate sec = pulses per rotation * no load speed RPM / 60
+            double maxTickRate = 1680 * 105 / 60;
+            // Fudge Factor
+            maxTickRate *= 6;
+
+            double pilotArmPower = getAnalogArmCommand(controller);
+            double copilotArmPower = copilotControllerActive ? getAnalogArmCommand(copilotController) : 0;
+            double armPower = pilotArmPower + copilotArmPower;
+            // Turn arm power into a target position.
+            // Target position is relative to current position, not current target.
+
+            if (Math.abs(armPower) >= 0.05) {
+                double stepsToCommand = (armPower * maxTickRate * loopPeriod);
+                armMotor.setTargetPosition(armMotor.getCurrentPosition() + (int)stepsToCommand);
+                armMotor.setPower( Math.abs(armPower+0.1));
+            } else {
+                // Don't change target position if arm is not being commanded
+                armMotor.setPower(0.5); // Station keeping
+            }
+
+        }
+
+    }
+
+
 }
