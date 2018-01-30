@@ -288,16 +288,15 @@ public class Manual extends RobotHardware {
     private double getAnalogArmCommand(Controller thisController) {
         double left_trigger = thisController.left_trigger;
         double right_trigger = thisController.right_trigger;
-        double armPower = 0;
+        double threshold = 0.05;
 
-        if (left_trigger > 0.1) {
-            armPower =  -(0.05 + 0.45 * left_trigger);
-        } else if (right_trigger > 0.1) {
-            armPower = (0.05 + 0.45 * right_trigger);
+        if (left_trigger > threshold) {
+            return  - 0.5 * left_trigger;
+        } else if (right_trigger > threshold) {
+            return 0.5 * right_trigger;
         } else {
-            armPower = 0;
+            return 0.0;
         }
-        return armPower;
     }
 
 
