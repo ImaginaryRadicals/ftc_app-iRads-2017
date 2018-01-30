@@ -233,37 +233,46 @@ public class Manual extends RobotHardware {
     // Claw Control
     // Right closes and Left Opens
     private void clawStateMachine() {
-        if (clawState == ClawState.CLAW_STOWED) {
-            storeClaw();
-            if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
-                clawState = ClawState.CLAW_OPEN;
-            }
-        } else if (clawState == ClawState.CLAW_OPEN) {
-            openClaw();
-            if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
-                clawState = ClawState.CLAW_CLOSED;
-            } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
-                clawState = ClawState.CLAW_STOWED;
-            }
-        } else if (clawState == ClawState.CLAW_CLOSED) {
-            closeClaw();
-            if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
-                clawState = ClawState.CLAW_RELEASE;
-            }
-        } else if (clawState == ClawState.CLAW_RELEASE) {
-            slightOpenClaw();
-            if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
-                clawState = ClawState.CLAW_CLOSED;
-            } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
-                clawState = ClawState.CLAW_OPEN;
-            }
-        } else if (clawState == ClawState.CLAW_TESTING) {
-            // No position commanded, leave where it is.
-            if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
-                clawState = ClawState.CLAW_CLOSED;
-            } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
-                clawState = ClawState.CLAW_OPEN;
-            }
+        switch (clawState)
+        {
+            case CLAW_STOWED:
+                storeClaw();
+                if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
+                    clawState = ClawState.CLAW_OPEN;
+                }
+                break;
+            case CLAW_OPEN:
+                openClaw();
+                if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
+                    clawState = ClawState.CLAW_CLOSED;
+                } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
+                    clawState = ClawState.CLAW_STOWED;
+                }
+                break;
+            case CLAW_CLOSED:
+                closeClaw();
+                if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
+                    clawState = ClawState.CLAW_RELEASE;
+                }
+                break;
+            case CLAW_RELEASE:
+                slightOpenClaw();
+                if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
+                    clawState = ClawState.CLAW_CLOSED;
+                } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
+                    clawState = ClawState.CLAW_OPEN;
+                }
+                break;
+            case CLAW_TESTING:
+                // No position commanded, leave where it is.
+                if (controller.rightBumperOnce() || copilotControllerActive && copilotController.rightBumperOnce()) {
+                    clawState = ClawState.CLAW_CLOSED;
+                } else if (controller.leftBumperOnce() || copilotControllerActive && copilotController.leftBumperOnce()) {
+                    clawState = ClawState.CLAW_OPEN;
+                }
+                break;
+            default:
+                break;
         }
     }
 
