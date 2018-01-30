@@ -204,12 +204,14 @@ public class InteractiveInit {
             telemetry.addData("INITIALIZATION", "*** LOCKED ***");
         }
     } // displayMenu()
-    
+
     // Updates the menu display
     public void update() {
-        displayMenu();
-        telemetry.update();
-        updateInputs();
+        if (interactiveMode) {
+            displayMenu();
+            telemetry.update();
+            updateInputs();
+        }
     }
 
     // Lock our selection and apply our selected settings
@@ -217,6 +219,11 @@ public class InteractiveInit {
         apply();
         displayMenu(); // Display 'locked' version of menu
         telemetry.update();
+        interactiveMode = false;
+    }
+
+    public void unlock() {
+        interactiveMode = true;
     }
 
     // menuInputLoop Method.
