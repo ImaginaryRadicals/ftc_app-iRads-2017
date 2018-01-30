@@ -364,6 +364,8 @@ public class Manual extends RobotHardware {
      */
     class MoveToPositionControl extends ArmRoutine {
         private double lastLoopTimestamp = 0;
+        private double previousAnalogInput = 0;
+        private double currentAnalogInput = 0;
 
         MoveToPositionControl(Manual opMode) {
             super(opMode);
@@ -388,6 +390,7 @@ public class Manual extends RobotHardware {
             double pilotArmPower = getAnalogArmCommand(controller);
             double copilotArmPower = copilotControllerActive ? getAnalogArmCommand(copilotController) : 0;
             double armPower = pilotArmPower + copilotArmPower;
+            updateAnalogInputReleasedTrigger(armPower);
             // Turn arm power into a target position.
             // Target position is relative to current position, not current target.
 
@@ -396,10 +399,22 @@ public class Manual extends RobotHardware {
                 armMotor.setTargetPosition(armMotor.getCurrentPosition() + (int)stepsToCommand);
                 armMotor.setPower( Math.abs(armPower+0.1));
             } else {
-                // Don't change target position if arm is not being commanded
+                if(analogInputReleasedOnce()){
+                    // Once, when arm input is first released, set target position to current position.
+                    armMotor.setTargetPosition(armMotor.getCurrentPosition());
+                }
                 armMotor.setPower(0.5); // Station keeping
             }
 
+        }
+
+        private boolean analogInputReleasedOnce() {
+            return (previousAnalogInput != 0 && currentAnalogInput == 0);
+        }
+
+        private void updateAnalogInputReleasedTrigger(double analogInput) {
+            previousAnalogInput = currentAnalogInput;
+            currentAnalogInput = analogInput;
         }
 
     }
