@@ -44,6 +44,7 @@ public class Manual extends RobotHardware {
     // Selectable during init_loop()
     private enum ArmControlMode {
         STANDARD,
+        NO_ENCODER_ARM_CONTROL,
         MOVE_TO_POSITION,
     }
     private ArmControlMode armControlMode = ArmControlMode.STANDARD;
@@ -96,6 +97,8 @@ public class Manual extends RobotHardware {
             armRoutine = new StandardControl(this);
         } else if (armControlMode == ArmControlMode.MOVE_TO_POSITION) {
             armRoutine = new MoveToPositionControl(this);
+        } else if (armControlMode == ArmControlMode.NO_ENCODER_ARM_CONTROL) {
+            armRoutine = new NoEncoderArmControl(this);
         }
 
         armRoutine.setup(); // Run init specific to arm routine.
@@ -356,6 +359,28 @@ public class Manual extends RobotHardware {
         public void setup() {
             armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        public void loop() {
+            double pilotArmPower = getAnalogArmCommand(opMode.controller);
+            double copilotArmPower = copilotControllerActive ? getAnalogArmCommand(copilotController) : 0;
+            armMotor.setPower(pilotArmPower + copilotArmPower);
+        }
+    }
+
+
+    /**
+     * Standard control, but without using encoder.
+     */
+    class NoEncoderArmControl extends ArmRoutine {
+        NoEncoderArmControl(Manual opMode) {
+            super(opMode);
+        }
+
+        public void setup() {
+            armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
