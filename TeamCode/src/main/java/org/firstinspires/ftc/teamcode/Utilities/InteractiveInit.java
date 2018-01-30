@@ -91,8 +91,8 @@ public class InteractiveInit {
         return double_options.size() + string_options.size() + boolean_options.size();
     }
 
-    // Applies selected state to 
-    private void apply()
+    // Applies selected state
+    public void apply()
     {
         for (VarOption<Double> arg : double_options)
             arg.apply();
@@ -179,7 +179,7 @@ public class InteractiveInit {
                 }
             }
         } else { // not interactiveMode
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < n; ++i) {
                 cursorMargin[i] = " "; // remove cursor margin
             }
         }
@@ -204,6 +204,20 @@ public class InteractiveInit {
             telemetry.addData("INITIALIZATION", "*** LOCKED ***");
         }
     } // displayMenu()
+    
+    // Updates the menu display
+    public void update() {
+        displayMenu();
+        telemetry.update();
+        updateInputs();
+    }
+
+    // Lock our selection and apply our selected settings
+    public void lock() {
+        apply();
+        displayMenu(); // Display 'locked' version of menu
+        telemetry.update();
+    }
 
     // menuInputLoop Method.
     // Note: This method contains a while() loop, so will block the program
