@@ -411,7 +411,7 @@ public class Manual extends RobotHardware {
         }
 
         public void loop() {
-            double loopPeriod = lastLoopTimestamp - time;
+            double loopPeriod = time - lastLoopTimestamp;
             lastLoopTimestamp = time;
             telemetry.addData("Target Distance", armMotor.getTargetPosition() - armMotor.getCurrentPosition());
 
