@@ -47,7 +47,7 @@ public class Manual extends RobotHardware {
         NO_ENCODER_ARM_CONTROL,
         MOVE_TO_POSITION,
     }
-    private ArmControlMode armControlMode = ArmControlMode.STANDARD;
+    private ArmControlMode armControlMode = ArmControlMode.MOVE_TO_POSITION;
     private ArmRoutine armRoutine; // Object which initializes and runs arm controls.
 
     int initialEncoderTicks = 0;
@@ -493,7 +493,7 @@ public class Manual extends RobotHardware {
             if (errorTicks <= 0) {
                 return 0.18;
             } else {
-                return 0.07;
+                return 0.15;
             }
         }
 
@@ -512,7 +512,8 @@ public class Manual extends RobotHardware {
             telemetry.addData("Offset Ticks:", armGeometry.offsetTicks);
             telemetry.addData("Arm State:", armState);
             telemetry.addLine();
-            telemetry.addData("Arm Height Inches", armGeometry.getTicksFromHeightInches(armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition())));
+            telemetry.addData("Arm Height Inches", armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition()));
+            telemetry.addData("Targete Angle Degrees", armGeometry.getAngleTargetDegreesFromTicks(armMotor.getCurrentPosition()));
             telemetry.addData("ticks per degree", armGeometry.ticksPerDegree);
             telemetry.addLine();
             telemetry.addData("lift offset active:", armLiftOffset);
@@ -621,9 +622,9 @@ public class Manual extends RobotHardware {
          * time, location, and armState, the appropriate offset setting is determined.
          */
         private void armOffsetStateMachine() {
-            double timeDelay = 3;
-            double distanceDelay = 3;
-            double angleDegreesDelay = 15;
+            double timeDelay = 2;
+            double distanceDelay = 1.5;
+            double angleDegreesDelay = 8;
 
 
             if (clawState == ClawState.CLAW_CLOSED && previousClawState != ClawState.CLAW_CLOSED) {
@@ -729,6 +730,11 @@ public class Manual extends RobotHardware {
             // Convert ticks to degrees above level
             double angleDeg = (armTicks - offsetTicks) / ticksPerDegree;
             return heightLevelInches + armLengthInches * Math.sin((angleDeg + bottomAngleDegrees)* (Math.PI/180));
+        }
+
+        public double getAngleTargetDegreesFromTicks(int armTicks) {
+            double angleDeg = (armTicks - offsetTicks) / ticksPerDegree + bottomAngleDegrees;
+            return angleDeg;
         }
     }
 

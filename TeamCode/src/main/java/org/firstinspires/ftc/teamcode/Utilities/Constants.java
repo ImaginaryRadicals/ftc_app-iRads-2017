@@ -22,12 +22,12 @@ public class Constants {
     public static final double JEWEL_ARM_TOP = 0.81;
 
     // Arm geometry
-    public static final double ARM_LENGTH_INCHES = 13.75;
+    public static final double ARM_LENGTH_INCHES = 14;
     public static final double ARM_BOTTOM_ANGLE_DEGREES = -40;
     public static final double ARM_TOP_ANGLE_DEGREES = 43;
     public static final int ARM_BOTTOM_TICKS = 0;
     public static final int ARM_LEVEL_TICKS = 600;
-    public static final int ARM_TOP_TICKS = 1200;
+    public static final int ARM_TOP_TICKS = 1180;
     public static final double ARM_SLOP_DEGREES = 12;
 
     // Block stacking geometry
