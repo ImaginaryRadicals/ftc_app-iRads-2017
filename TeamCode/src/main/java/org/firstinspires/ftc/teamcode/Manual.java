@@ -50,15 +50,15 @@ public class Manual extends RobotHardware {
     private ArmControlMode armControlMode = ArmControlMode.STANDARD;
     private ArmRoutine armRoutine; // Object which initializes and runs arm controls.
 
-    double initialEncoderTicks;
+    int initialEncoderTicks = 0;
     private enum ArmState {
         LEVEL_1,
         LEVEL_2,
         LEVEL_3,
         LEVEL_4,
-        MANUAL_HOLD,
+        MANUAL,
     }
-    private ArmState armState = ArmState.MANUAL_HOLD;
+    private ArmState armState = ArmState.MANUAL;
 
 
     @Override
@@ -387,6 +387,10 @@ public class Manual extends RobotHardware {
         public void loop() {
             double pilotArmPower = getAnalogArmCommand(opMode.controller);
             double copilotArmPower = copilotControllerActive ? getAnalogArmCommand(copilotController) : 0;
+            double totalArmPower = pilotArmPower + copilotArmPower;
+            if (totalArmPower < 0) {
+                totalArmPower *= 0.5; // Reduce downward power by half (when without encoders)
+            }
             armMotor.setPower(pilotArmPower + copilotArmPower);
         }
     }
@@ -399,6 +403,11 @@ public class Manual extends RobotHardware {
         private double lastLoopTimestamp = 0;
         private double previousAnalogInput = 0;
         private double currentAnalogInput = 0;
+        private boolean armLiftOffset = false;
+        private double dPadOffsetOverride = -1;
+        private ClawState previousClawState = ClawState.CLAW_STOWED;
+        private ArmState previousArmState = ArmState.MANUAL;
+        private ArmGeometry armGeometry;
 
         MoveToPositionControl(Manual opMode) {
             super(opMode);
@@ -408,6 +417,8 @@ public class Manual extends RobotHardware {
             armMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            armMotor.setTargetPosition(initialEncoderTicks);
+            armGeometry = new ArmGeometry(initialEncoderTicks); // Set assumed bottom position.
         }
 
         public void loop() {
@@ -427,10 +438,12 @@ public class Manual extends RobotHardware {
             // Turn arm power into a target position.
             // Target position is relative to current position, not current target.
 
+
             if (Math.abs(armPower) >= 0.05) {
                 double stepsToCommand = (armPower * maxTickRate * loopPeriod);
                 armMotor.setTargetPosition(armMotor.getCurrentPosition() + (int)stepsToCommand);
                 armMotor.setPower( Math.abs(armPower+0.1));
+                armState = ArmState.MANUAL; // Disable state machine until dpad inputs.
             } else {
                 if(analogInputReleasedOnce()){
                     // Once, when arm input is first released, set target position to current position.
@@ -438,6 +451,24 @@ public class Manual extends RobotHardware {
                 }
                 armMotor.setPower(0.5); // Station keeping
             }
+
+            // Use dpad left/right to disable/enable the level offset lift, which lifts the arm
+            // a small bit (1 inch) to clear other blocks when placing them.
+            if (controller.dpadRightOnce() || copilotControllerActive && copilotController.dpadRightOnce()) {
+                // Activate offset, lift by ~ 1 inch over state level.
+                dPadOffsetOverride = 1;
+                armLiftOffset = true;
+            } else if (controller.dpadLeftOnce() || copilotControllerActive && copilotController.dpadLeftOnce()) {
+                dPadOffsetOverride = 0;
+                armLiftOffset = false;
+            }
+
+            // Run Arm State machine.  Does nothing if in Manual state (after analog inputs)
+            armStateMachine(controller);
+            if (copilotControllerActive) {
+                armStateMachine(copilotController);
+            }
+
 
         }
 
@@ -450,6 +481,127 @@ public class Manual extends RobotHardware {
             currentAnalogInput = analogInput;
         }
 
+
+        private void armStateMachine(Controller controller) {
+            double levelSpacingInches = Constants.BLOCK_HEIGHT_INCHES;
+            double levelOffsetInches = armLiftOffset ? Constants.BLOCK_OFFSET_INCHES : 0;
+
+            ArmState nextState = armState; // Default setting
+            switch (armState)
+            {
+                case LEVEL_1:
+                    armMotor.setTargetPosition(armGeometry.getTicksFromHeightInches(0*levelSpacingInches + levelOffsetInches));
+                    // Next State Logic
+                    if (controller.dpadUpOnce()) {
+                        nextState = ArmState.LEVEL_2;
+                    }
+                    break;
+                case LEVEL_2:
+                    armMotor.setTargetPosition(armGeometry.getTicksFromHeightInches(1*levelSpacingInches + levelOffsetInches));
+                    // Next State Logic
+                    if (controller.dpadDownOnce()) {
+                        nextState = ArmState.LEVEL_1;
+                    } else if (controller.dpadUpOnce()) {
+                        nextState = ArmState.LEVEL_3;
+                    }
+                    break;
+                case LEVEL_3:
+                    armMotor.setTargetPosition(armGeometry.getTicksFromHeightInches(2*levelSpacingInches + levelOffsetInches));
+                    // Next State Logic
+                    if (controller.dpadDownOnce()) {
+                        nextState = ArmState.LEVEL_2;
+                    } else if (controller.dpadUpOnce()) {
+                        nextState = ArmState.LEVEL_4;
+                    }
+                    break;
+                case LEVEL_4:
+                    armMotor.setTargetPosition(armGeometry.getTicksFromHeightInches(3*levelSpacingInches + levelOffsetInches));
+                    // Next State Logic
+                    if (controller.dpadDownOnce()) {
+                        nextState = ArmState.LEVEL_3;
+                    }
+                    break;
+                case MANUAL:
+                    // Do nothing. Current targetPosition should be unmodified by this function.
+                    break;
+                default:
+                    nextState = ArmState.MANUAL;
+                    break;
+            }
+            if (previousArmState != armState) {
+                // Arm state shifted, initialize
+                dPadOffsetOverride = -1;
+            }
+            armState = nextState;
+        }
+
+    }
+
+    /** Positions are measured after turning on the robot with the arm
+     * at its lowest position, but with the arm gearing taught and ready
+     * to lift.  Bottom angle is 0 by definition, but offset ticks are possible,
+     * which shift every tick positoin up.
+     * Note: bottomAngle is expected to be a negative number.
+     */
+    class ArmGeometry {
+        private int offsetTicks = 0;
+        private double armLengthInches, bottomAngleDegrees, topAngleDegrees;
+        private int bottomTicks, levelTicks, topTicks;
+        private double ticksPerDegree, heightLevelInches;
+        private double slopDegrees, slopTicks;
+
+        ArmGeometry() {
+            this(0);
+        }
+
+        ArmGeometry(int ticksOffset) {
+            this(Constants.ARM_LENGTH_INCHES, Constants.ARM_BOTTOM_ANGLE_DEGREES,
+                    Constants.ARM_TOP_ANGLE_DEGREES, Constants.ARM_BOTTOM_TICKS,
+                    Constants.ARM_LEVEL_TICKS, Constants.ARM_TOP_TICKS, ticksOffset);
+        }
+
+        ArmGeometry(double lengthInches, double bottomAngleDegrees, double topAngleDegrees,
+                    int bottomTicks, int levelTicks, int topTicks, int ticksOffset) {
+            this.armLengthInches = lengthInches;
+            this.bottomAngleDegrees = bottomAngleDegrees;
+            this.topAngleDegrees = topAngleDegrees;
+            this.bottomTicks = bottomTicks;
+            this.levelTicks = levelTicks;
+            this.topTicks = topTicks;
+            alignOffsets(ticksOffset);
+        }
+
+        void alignOffsets(int tickOffset) {
+            armLengthInches += tickOffset;
+            bottomAngleDegrees += tickOffset;
+            topAngleDegrees += tickOffset;
+            bottomTicks += tickOffset;
+            levelTicks += tickOffset;
+            topTicks += tickOffset;
+
+            offsetTicks += tickOffset;
+            ticksPerDegree = (topAngleDegrees - bottomAngleDegrees) / (topTicks - bottomTicks);
+            heightLevelInches = - armLengthInches * Math.sin(bottomAngleDegrees*Math.PI/180);
+        }
+
+        /**
+         * height is taken to be zero when the claw is at
+         * bottomTicks, which is 0 ticks unless an offset is added,
+         * and bottomAngleDegrees.
+         * @param heightInches
+         * @return int encoder ticks
+         */
+        public int getTicksFromHeightInches(double heightInches) {
+            // Calculate angle above level for given height
+            double angleDeg = Math.asin((heightInches - heightLevelInches)/armLengthInches)*(180/Math.PI);
+            return (int) (angleDeg * ticksPerDegree);
+        }
+
+        public double getHeightInchesFromTicks(int armTicks) {
+            // Convert ticks to degrees above level
+            double angleDeg = armTicks / ticksPerDegree;
+            return heightLevelInches + armLengthInches * Math.sin(angleDeg * (Math.PI/180));
+        }
     }
 
 

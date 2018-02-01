@@ -6,8 +6,6 @@ package org.firstinspires.ftc.teamcode.Utilities;
 
 public class Constants {
 
-    public static final double MID_SERVO            =  0.5 ;
-
     // public doubles for the left and right CLAW
     public static final double LEFT_CLAW_OPEN = 0.39;
     public static final double RIGHT_CLAW_OPEN = 0.49;
@@ -23,10 +21,19 @@ public class Constants {
     public static final double JEWEL_ARM_BOTTOM = 0.05;
     public static final double JEWEL_ARM_TOP = 0.81;
 
-    public static final double ARM_TICKS_PER_DEGREE = 5;
-    public static final int RAISE_ARM_POSITION = 3000;
-    public static final int LOWER_ARM_POSITION = 0;
+    // Arm geometry
+    public static final double ARM_LENGTH_INCHES = 18; // ?
+    public static final double ARM_BOTTOM_ANGLE_DEGREES = -40.5;
+    public static final double ARM_TOP_ANGLE_DEGREES = 38;
+    public static final int ARM_BOTTOM_TICKS = 0;
+    public static final int ARM_LEVEL_TICKS = 500; // ?
+    public static final int ARM_TOP_TICKS = 1000; // ?
+    public static final double ARM_SLOP_DEGREES = 15; // ?
+    public static final double ARM_SLOP_TICKS = 100; // ?
 
+    // Block stacking geometry
+    public static final double BLOCK_HEIGHT_INCHES = 6;
+    public static final double BLOCK_OFFSET_INCHES = 1;
 
     public static final double DRIVE_WHEEL_DIAMETER_INCHES  =  4;
     public static final double DRIVE_WHEEL_LATERAL_RATIO = 0.89;

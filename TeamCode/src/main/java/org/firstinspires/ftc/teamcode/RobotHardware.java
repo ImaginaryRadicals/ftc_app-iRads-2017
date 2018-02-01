@@ -234,10 +234,10 @@ public abstract class RobotHardware extends OpMode {
 
     // Arm positions
     protected void raiseArm(){
-        setTargetPosition(MotorName.ARM_MOTOR, Constants.RAISE_ARM_POSITION);
+        setTargetPosition(MotorName.ARM_MOTOR, Constants.ARM_TOP_TICKS);
     }
     protected void lowerArm(){
-        setTargetPosition(MotorName.ARM_MOTOR, Constants.LOWER_ARM_POSITION);
+        setTargetPosition(MotorName.ARM_MOTOR, Constants.ARM_BOTTOM_TICKS);
     }
 
     //Same thing as the Servo one, but for a motor
