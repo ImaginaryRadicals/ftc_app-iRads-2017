@@ -491,9 +491,9 @@ public class Manual extends RobotHardware {
             //double powerScale = AutoDrive.rampDown(errorTicks,300, 1, 0.2);
             //return 0.3 * powerScale;
             if (errorTicks <= 0) {
-                return 0.1;
+                return 0.18;
             } else {
-                return 0.04;
+                return 0.07;
             }
         }
 
@@ -509,22 +509,12 @@ public class Manual extends RobotHardware {
 
         public void telemetry() {
             telemetry.addLine();
-            telemetry.addData("Offset Ticks:", initialEncoderTicks);
+            telemetry.addData("Offset Ticks:", armGeometry.offsetTicks);
             telemetry.addData("Arm State:", armState);
-            telemetry.addData("LEVEL_1 Ticks", armGeometry.getTicksFromHeightInches(0*Constants.BLOCK_HEIGHT_INCHES));
-            telemetry.addData("LEVEL_2 Ticks", armGeometry.getTicksFromHeightInches(1*Constants.BLOCK_HEIGHT_INCHES));
-            telemetry.addData("LEVEL_3 Ticks", armGeometry.getTicksFromHeightInches(2*Constants.BLOCK_HEIGHT_INCHES));
-            telemetry.addData("LEVEL_4 Ticks", armGeometry.getTicksFromHeightInches(3*Constants.BLOCK_HEIGHT_INCHES));
+            telemetry.addLine();
             telemetry.addData("Arm Height Inches", armGeometry.getTicksFromHeightInches(armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition())));
             telemetry.addData("ticks per degree", armGeometry.ticksPerDegree);
-            telemetry.addData("Level Height Inches", -armGeometry.armLengthInches * Math.sin(armGeometry.bottomAngleDegrees*Math.PI/180));
             telemetry.addLine();
-            telemetry.addData("topAngle Degrees", armGeometry.topAngleDegrees);
-            telemetry.addData("bottomAngle Degrees", armGeometry.bottomAngleDegrees);
-            telemetry.addData("top Ticks", armGeometry.topTicks);
-            telemetry.addData("bottom Ticks", armGeometry.bottomTicks);
-            telemetry.addLine();
-            telemetry.addData("ticks from height from ticks", armGeometry.getTicksFromHeightInches(armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition())));
             telemetry.addData("lift offset active:", armLiftOffset);
             telemetry.addData("dPad offset Override", dPadOffsetOverride);
         }
@@ -631,8 +621,8 @@ public class Manual extends RobotHardware {
          * time, location, and armState, the appropriate offset setting is determined.
          */
         private void armOffsetStateMachine() {
-            double timeDelay = 5;
-            double distanceDelay = 4;
+            double timeDelay = 3;
+            double distanceDelay = 3;
             double angleDegreesDelay = 15;
 
 
@@ -659,8 +649,8 @@ public class Manual extends RobotHardware {
                 // Claw is closed
                 if (armState != clawLastOpen.armState ||
                         (time - clawLastOpen.time) > timeDelay ||
-                        mecanumNavigation.currentPosition.distanceTo(clawLastOpen.position) > 4 ||
-                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastOpen.position) > 15) {
+                        mecanumNavigation.currentPosition.distanceTo(clawLastOpen.position) > distanceDelay ||
+                        Math.abs(mecanumNavigation.currentPosition.angleDegreesTo(clawLastOpen.position)) > angleDegreesDelay) {
                     armLiftOffset = true;
                 }
 
@@ -668,9 +658,9 @@ public class Manual extends RobotHardware {
                 // Claw is open
                 if (armState != clawLastClosed.armState ||
                         armState == ArmState.LEVEL_1 ||
-                        (time - clawLastClosed.time) > timeDelay && time < 100 ||
+                        (time - clawLastClosed.time) > timeDelay ||
                         mecanumNavigation.currentPosition.distanceTo(clawLastClosed.position) > distanceDelay ||
-                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastClosed.position) > angleDegreesDelay) {
+                        Math.abs(mecanumNavigation.currentPosition.angleDegreesTo(clawLastClosed.position)) > angleDegreesDelay) {
                     armLiftOffset = false;
                 }
             }
