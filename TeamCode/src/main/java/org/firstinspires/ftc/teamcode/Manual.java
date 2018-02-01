@@ -449,15 +449,17 @@ public class Manual extends RobotHardware {
             if (Math.abs(armPower) >= 0.05) {
                 double stepsToCommand = (armPower * maxTickRate * loopPeriod);
                 armMotor.setTargetPosition(armMotor.getCurrentPosition() + (int)stepsToCommand);
-                armMotor.setPower( Math.abs(armPower+0.1));
+                armMotor.setPower( Math.abs(armPower));
                 armState = ArmState.MANUAL; // Disable state machine until dpad inputs.
             } else {
                 if(analogInputReleasedOnce()){
                     // Once, when arm input is first released, set target position to current position.
                     armMotor.setTargetPosition(armMotor.getCurrentPosition());
                 }
-                double powerScale = AutoDrive.rampDown(armMotor.getTargetPosition() - armMotor.getCurrentPosition(),300, 1, 0.2);
-                armMotor.setPower(0.3 * powerScale); // Station keeping
+                // When Analog input == 0, hold (or moveTo) targetPosition(), set either
+                // by the position analog inputs ceased, or by the armStateMachine().
+                int armError = armMotor.getCurrentPosition() - armMotor.getTargetPosition();
+                armMotor.setPower(getArmPowerFromError(armError));
             }
 
             // Use dpad left/right to disable/enable the level offset lift, which lifts the arm
@@ -477,9 +479,19 @@ public class Manual extends RobotHardware {
             if (copilotControllerActive) {
                 armStateMachine(copilotController);
             }
-
-
         }
+
+        /**
+         * Negative error means our current position is below the desired position.
+         * Error = current - target
+         * @param errorTicks
+         * @return
+         */
+        private double getArmPowerFromError(int errorTicks) {
+            double powerScale = AutoDrive.rampDown(errorTicks,300, 1, 0.2);
+            return 0.3 * powerScale;
+        }
+
 
         private boolean analogInputReleasedOnce() {
             return (previousAnalogInput != 0 && currentAnalogInput == 0);
@@ -614,6 +626,11 @@ public class Manual extends RobotHardware {
          * time, location, and armState, the appropriate offset setting is determined.
          */
         private void armOffsetStateMachine() {
+            double timeDelay = 5;
+            double distanceDelay = 4;
+            double angleDegreesDelay = 15;
+
+
             if (clawState == ClawState.CLAW_CLOSED && previousClawState != ClawState.CLAW_CLOSED) {
                 // Detect transitions to CLAW_CLOSED, and store most recent clawLastOpen telemetry
                 clawLastOpen = new RobotStateSnapshot(time,
@@ -636,7 +653,7 @@ public class Manual extends RobotHardware {
             } else if (clawState == ClawState.CLAW_CLOSED) {
                 // Claw is closed
                 if (armState != clawLastOpen.armState ||
-                        (time - clawLastOpen.time) > 2 ||
+                        (time - clawLastOpen.time) > timeDelay ||
                         mecanumNavigation.currentPosition.distanceTo(clawLastOpen.position) > 4 ||
                         mecanumNavigation.currentPosition.angleDegreesTo(clawLastOpen.position) > 15) {
                     armLiftOffset = true;
@@ -646,15 +663,16 @@ public class Manual extends RobotHardware {
                 // Claw is open
                 if (armState != clawLastClosed.armState ||
                         armState == ArmState.LEVEL_1 ||
-                        (time - clawLastClosed.time) > 2 && time < 100 ||
-                        mecanumNavigation.currentPosition.distanceTo(clawLastClosed.position) > 4 ||
-                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastClosed.position) > 15) {
+                        (time - clawLastClosed.time) > timeDelay && time < 100 ||
+                        mecanumNavigation.currentPosition.distanceTo(clawLastClosed.position) > distanceDelay ||
+                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastClosed.position) > angleDegreesDelay) {
                     armLiftOffset = false;
                 }
             }
         }
 
     }
+
 
     /** Positions are measured after turning on the robot with the arm
      * at its lowest position, but with the arm gearing taught and ready
