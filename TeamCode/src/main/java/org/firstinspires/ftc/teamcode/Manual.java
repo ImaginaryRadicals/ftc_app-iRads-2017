@@ -408,6 +408,12 @@ public class Manual extends RobotHardware {
         private ClawState previousClawState = ClawState.CLAW_STOWED;
         private ArmState previousArmState = ArmState.MANUAL;
         private ArmGeometry armGeometry;
+        private RobotStateSnapshot clawLastOpen = new RobotStateSnapshot(time,
+                new MecanumNavigation.Navigation2D(0,0,0),
+                ArmState.MANUAL);
+        private RobotStateSnapshot clawLastClosed = new RobotStateSnapshot(time,
+                new MecanumNavigation.Navigation2D(0,0,0),
+                ArmState.MANUAL);
 
         MoveToPositionControl(Manual opMode) {
             super(opMode);
@@ -450,7 +456,8 @@ public class Manual extends RobotHardware {
                     // Once, when arm input is first released, set target position to current position.
                     armMotor.setTargetPosition(armMotor.getCurrentPosition());
                 }
-                armMotor.setPower(0.05); // Station keeping
+                double powerScale = AutoDrive.rampDown(armMotor.getTargetPosition() - armMotor.getCurrentPosition(),300, 1, 0.2);
+                armMotor.setPower(0.3 * powerScale); // Station keeping
             }
 
             // Use dpad left/right to disable/enable the level offset lift, which lifts the arm
@@ -464,6 +471,7 @@ public class Manual extends RobotHardware {
                 armLiftOffset = false;
             }
 
+            armOffsetStateMachine();
             // Run Arm State machine.  Does nothing if in Manual state (after analog inputs)
             armStateMachine(controller);
             if (copilotControllerActive) {
@@ -580,6 +588,70 @@ public class Manual extends RobotHardware {
             }
             previousArmState = armState; // prepare for next loop
             armState = nextState;
+        }
+
+        // Store robot state snapshot. Used by armOffsetStateMachine()
+        class RobotStateSnapshot {
+            public double time;
+            public MecanumNavigation.Navigation2D position;
+            public ArmState armState;
+
+            RobotStateSnapshot(double time, MecanumNavigation.Navigation2D position, ArmState armState) {
+                this.time = time;
+                this.position = position;
+                this.armState = armState;
+            }
+        }
+
+        /**
+         * State machine to determine whether to automatically toggle offset on or off.
+         * Updates and uses the value of previousArmState.
+         * Detects transitions to and from CLAW_CLOSED.
+         * On transitions to CLAW_CLOSED, updates clawLastOpen[time, navPosition, armState]
+         * On transitions from CLAW_CLOSED, updates clawLastClosed[time, navPosition, armState]
+         * (then updates previousClawState)
+         * Then, based on current claw state (Closed or !Closed) and the difference between
+         * time, location, and armState, the appropriate offset setting is determined.
+         */
+        private void armOffsetStateMachine() {
+            if (clawState == ClawState.CLAW_CLOSED && previousClawState != ClawState.CLAW_CLOSED) {
+                // Detect transitions to CLAW_CLOSED, and store most recent clawLastOpen telemetry
+                clawLastOpen = new RobotStateSnapshot(time,
+                        (MecanumNavigation.Navigation2D) mecanumNavigation.currentPosition.clone(),
+                        armState);
+            } else if (clawState != ClawState.CLAW_CLOSED && previousClawState == ClawState.CLAW_CLOSED) {
+                // Detect transitions from CLAW_CLOSED, and store most recent clawLastClosed telemetry
+                clawLastClosed = new RobotStateSnapshot(time,
+                        (MecanumNavigation.Navigation2D) mecanumNavigation.currentPosition.clone(),
+                        armState);
+            }
+            previousClawState = clawState; // Updated for next loop.
+
+            // Give dpad precedence over autonomous decisions.
+            if (dPadOffsetOverride == 1) {
+                armLiftOffset = true;
+            } else if (dPadOffsetOverride == 0) {
+                armLiftOffset = false;
+
+            } else if (clawState == ClawState.CLAW_CLOSED) {
+                // Claw is closed
+                if (armState != clawLastOpen.armState ||
+                        (time - clawLastOpen.time) > 2 ||
+                        mecanumNavigation.currentPosition.distanceTo(clawLastOpen.position) > 4 ||
+                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastOpen.position) > 15) {
+                    armLiftOffset = true;
+                }
+
+            } else if (clawState != ClawState.CLAW_CLOSED) {
+                // Claw is open
+                if (armState != clawLastClosed.armState ||
+                        armState == ArmState.LEVEL_1 ||
+                        (time - clawLastClosed.time) > 2 && time < 100 ||
+                        mecanumNavigation.currentPosition.distanceTo(clawLastClosed.position) > 4 ||
+                        mecanumNavigation.currentPosition.angleDegreesTo(clawLastClosed.position) > 15) {
+                    armLiftOffset = false;
+                }
+            }
         }
 
     }

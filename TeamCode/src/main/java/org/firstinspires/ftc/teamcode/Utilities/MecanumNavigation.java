@@ -175,6 +175,15 @@ public class MecanumNavigation {
                                  this.theta - other.theta);
         }
 
+        // Distance formula
+        public double distanceTo(Navigation2D other) {
+            return Math.sqrt( Math.pow(other.x - this.x,2) + Math.pow(other.y - this.y,2));
+        }
+
+        public double angleDegreesTo(Navigation2D other) {
+            return (other.theta - this.theta) * 180 / Math.PI;
+        }
+
         /**
          * When "this" Navigation2D instance refers to an absolute position,
          * and the argument,
