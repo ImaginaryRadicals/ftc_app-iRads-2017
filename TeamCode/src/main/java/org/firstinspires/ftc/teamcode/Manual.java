@@ -488,8 +488,13 @@ public class Manual extends RobotHardware {
          * @return
          */
         private double getArmPowerFromError(int errorTicks) {
-            double powerScale = AutoDrive.rampDown(errorTicks,300, 1, 0.2);
-            return 0.3 * powerScale;
+            //double powerScale = AutoDrive.rampDown(errorTicks,300, 1, 0.2);
+            //return 0.3 * powerScale;
+            if (errorTicks <= 0) {
+                return 0.1;
+            } else {
+                return 0.04;
+            }
         }
 
 
