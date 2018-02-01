@@ -425,6 +425,7 @@ public class Manual extends RobotHardware {
             double loopPeriod = time - lastLoopTimestamp;
             lastLoopTimestamp = time;
             telemetry.addData("Target Distance", armMotor.getTargetPosition() - armMotor.getCurrentPosition());
+            telemetry();
 
             // MaxTick rate sec = pulses per rotation * no load speed RPM / 60
             double maxTickRate = 1680 * 105 / 60;
@@ -449,7 +450,7 @@ public class Manual extends RobotHardware {
                     // Once, when arm input is first released, set target position to current position.
                     armMotor.setTargetPosition(armMotor.getCurrentPosition());
                 }
-                armMotor.setPower(0.5); // Station keeping
+                armMotor.setPower(0.05); // Station keeping
             }
 
             // Use dpad left/right to disable/enable the level offset lift, which lifts the arm
@@ -479,6 +480,28 @@ public class Manual extends RobotHardware {
         private void updateAnalogInputReleasedTrigger(double analogInput) {
             previousAnalogInput = currentAnalogInput;
             currentAnalogInput = analogInput;
+        }
+
+        public void telemetry() {
+            telemetry.addLine();
+            telemetry.addData("Offset Ticks:", initialEncoderTicks);
+            telemetry.addData("Arm State:", armState);
+            telemetry.addData("LEVEL_1 Ticks", armGeometry.getTicksFromHeightInches(0*Constants.BLOCK_HEIGHT_INCHES));
+            telemetry.addData("LEVEL_2 Ticks", armGeometry.getTicksFromHeightInches(1*Constants.BLOCK_HEIGHT_INCHES));
+            telemetry.addData("LEVEL_3 Ticks", armGeometry.getTicksFromHeightInches(2*Constants.BLOCK_HEIGHT_INCHES));
+            telemetry.addData("LEVEL_4 Ticks", armGeometry.getTicksFromHeightInches(3*Constants.BLOCK_HEIGHT_INCHES));
+            telemetry.addData("Arm Height Inches", armGeometry.getTicksFromHeightInches(armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition())));
+            telemetry.addData("ticks per degree", armGeometry.ticksPerDegree);
+            telemetry.addData("Level Height Inches", -armGeometry.armLengthInches * Math.sin(armGeometry.bottomAngleDegrees*Math.PI/180));
+            telemetry.addLine();
+            telemetry.addData("topAngle Degrees", armGeometry.topAngleDegrees);
+            telemetry.addData("bottomAngle Degrees", armGeometry.bottomAngleDegrees);
+            telemetry.addData("top Ticks", armGeometry.topTicks);
+            telemetry.addData("bottom Ticks", armGeometry.bottomTicks);
+            telemetry.addLine();
+            telemetry.addData("ticks from height from ticks", armGeometry.getTicksFromHeightInches(armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition())));
+            telemetry.addData("lift offset active:", armLiftOffset);
+            telemetry.addData("dPad offset Override", dPadOffsetOverride);
         }
 
 
@@ -523,6 +546,29 @@ public class Manual extends RobotHardware {
                     break;
                 case MANUAL:
                     // Do nothing. Current targetPosition should be unmodified by this function.
+                    // Next State Logic, move to nearest state to current position.
+                    double heightInches = armGeometry.getHeightInchesFromTicks(armMotor.getCurrentPosition());
+                    if (controller.dpadDownOnce()) {
+                        if (heightInches < 1*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_1;
+                        } else if (heightInches < 2*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_2;
+                        } else if (heightInches < 3*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_3;
+                        } else {
+                            nextState = ArmState.LEVEL_4;
+                        }
+                    } else if (controller.dpadUpOnce()) {
+                        if (heightInches > 2*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_4;
+                        } else if (heightInches > 1*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_3;
+                        } else if (heightInches > 0*levelSpacingInches) {
+                            nextState = ArmState.LEVEL_2;
+                        } else {
+                            nextState = ArmState.LEVEL_1;
+                        }
+                    }
                     break;
                 default:
                     nextState = ArmState.MANUAL;
@@ -532,6 +578,7 @@ public class Manual extends RobotHardware {
                 // Arm state shifted, initialize
                 dPadOffsetOverride = -1;
             }
+            previousArmState = armState; // prepare for next loop
             armState = nextState;
         }
 
@@ -572,15 +619,11 @@ public class Manual extends RobotHardware {
         }
 
         void alignOffsets(int tickOffset) {
-            armLengthInches += tickOffset;
-            bottomAngleDegrees += tickOffset;
-            topAngleDegrees += tickOffset;
             bottomTicks += tickOffset;
             levelTicks += tickOffset;
             topTicks += tickOffset;
-
             offsetTicks += tickOffset;
-            ticksPerDegree = (topAngleDegrees - bottomAngleDegrees) / (topTicks - bottomTicks);
+            ticksPerDegree = (topTicks - bottomTicks) / (topAngleDegrees - bottomAngleDegrees);
             heightLevelInches = - armLengthInches * Math.sin(bottomAngleDegrees*Math.PI/180);
         }
 
@@ -594,13 +637,13 @@ public class Manual extends RobotHardware {
         public int getTicksFromHeightInches(double heightInches) {
             // Calculate angle above level for given height
             double angleDeg = Math.asin((heightInches - heightLevelInches)/armLengthInches)*(180/Math.PI);
-            return (int) (angleDeg * ticksPerDegree);
+            return (int) ( (angleDeg - bottomAngleDegrees)* ticksPerDegree) + offsetTicks;
         }
 
         public double getHeightInchesFromTicks(int armTicks) {
             // Convert ticks to degrees above level
-            double angleDeg = armTicks / ticksPerDegree;
-            return heightLevelInches + armLengthInches * Math.sin(angleDeg * (Math.PI/180));
+            double angleDeg = (armTicks - offsetTicks) / ticksPerDegree;
+            return heightLevelInches + armLengthInches * Math.sin((angleDeg + bottomAngleDegrees)* (Math.PI/180));
         }
     }
 
