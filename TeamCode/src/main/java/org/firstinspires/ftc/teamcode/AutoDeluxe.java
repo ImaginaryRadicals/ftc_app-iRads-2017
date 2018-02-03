@@ -33,7 +33,7 @@ public class AutoDeluxe extends RobotHardware {
     public Controller controller;
     public SkewMode skewMode = SkewMode.NORMAL;
     public enum SkewMode{
-        NORMAL, T0, T90, TNEG90, T30, TNEG30,
+        NORMAL, NO_ARM_ENCODERS, T0, T90, TNEG90, T30, TNEG30,
     }
 
 

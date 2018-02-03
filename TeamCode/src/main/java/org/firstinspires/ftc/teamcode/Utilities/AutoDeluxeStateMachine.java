@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Utilities;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -53,6 +54,8 @@ public class AutoDeluxeStateMachine {
     private double armLiftHeight = 700;
     private double signedSkewAngleRadiansCCW;
 
+    DcMotor armMotor;
+
 
     public AutoDeluxeStateMachine(AutoDeluxe opMode, Color.Ftc teamColor, RobotHardware.StartPosition startPosition) {
         this.opMode = opMode;
@@ -64,6 +67,10 @@ public class AutoDeluxeStateMachine {
     public void init() {
         stateLoopTimer.reset();
         stateTimer.reset();
+        if (opMode.skewMode== AutoDeluxe.SkewMode.NO_ARM_ENCODERS) {
+            armMotor = opMode.hardwareMap.get(DcMotor.class, "ARM_MOTOR");
+            armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 
 
@@ -82,10 +89,15 @@ public class AutoDeluxeStateMachine {
 
             // Wait 1 second before lifting arm.
             if(stateTimer.seconds() > 1) {
-                if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < initialArmEncoderTicks + armLiftHeight) {
-                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
-                } else {
+                if (opMode.skewMode == AutoDeluxe.SkewMode.NO_ARM_ENCODERS) {
+                    // Do nothing with arm
                     opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                } else { // Standard mode
+                    if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) < initialArmEncoderTicks + armLiftHeight) {
+                        opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0.5);
+                    } else {
+                        opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                    }
                 }
             }
             // Give jewel arm 2.5 seconds to settle, then detect the color.
@@ -174,13 +186,19 @@ public class AutoDeluxeStateMachine {
 
             if (arrivedAtWaypoint) {
                 // Lower arm
-                if ( opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) > initialArmEncoderTicks) {
-                    opMode.setPower(RobotHardware.MotorName.ARM_MOTOR,-0.2);
-                    stateTimer.reset();
-                } else {
+                if (opMode.skewMode == AutoDeluxe.SkewMode.NO_ARM_ENCODERS) {
+                    // Encoders off, Do nothing with arm
                     opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
-                    opMode.stopAllMotors();
                     armLowered = true;
+                } else { // Standard mode
+                    if (opMode.getEncoderValue(RobotHardware.MotorName.ARM_MOTOR) > initialArmEncoderTicks) {
+                        opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, -0.2);
+                        stateTimer.reset();
+                    } else {
+                        opMode.setPower(RobotHardware.MotorName.ARM_MOTOR, 0);
+                        opMode.stopAllMotors();
+                        armLowered = true;
+                    }
                 }
 
 
