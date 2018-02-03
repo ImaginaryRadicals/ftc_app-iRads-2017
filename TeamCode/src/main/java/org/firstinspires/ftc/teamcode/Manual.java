@@ -33,7 +33,7 @@ public class Manual extends RobotHardware {
     private boolean exponential_input = true;
     private boolean slow_mode = false;
     private ClawState clawState = ClawState.CLAW_STOWED;
-    private boolean fastMode = false;
+    private boolean fastMode = true;
     private MecanumNavigation.Navigation2D pickupPosition = new MecanumNavigation.Navigation2D(0,0,0);
 
     // Variables for the claw states.
